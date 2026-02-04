@@ -1,109 +1,131 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>原神 聖遺物スコア（完全版）</title>
-
-<style>
-body {
-  background: radial-gradient(circle at top, #1e2a44, #0b0f1a);
-  color: #f5f2eb;
-  font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
-  padding: 12px;
-}
-h2 {
-  text-align: center;
-  color: #f6e7b2;
-}
-input, button {
-  width: 100%;
-  padding: 14px;
-  font-size: 18px;
-  border-radius: 14px;
-  border: none;
-  margin-top: 10px;
-}
-input {
-  background: #1c2540;
-  color: #fff;
-}
-button {
-  background: linear-gradient(135deg, #e9c46a, #f4a261);
-  color: #2b1d0e;
-  font-weight: bold;
-}
-.card {
-  background: linear-gradient(180deg, #1b233d, #12182c);
-  border-radius: 18px;
-  padding: 14px;
-  margin-top: 16px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.6);
-}
-.char {
-  font-size: 20px;
-  font-weight: bold;
-  color: #f6e7b2;
-}
-.art {
-  margin-top: 8px;
-  padding: 10px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.05);
-  font-size: 15px;
-}
-.total {
-  margin-top: 10px;
-  font-size: 17px;
-  text-align: right;
-  color: #e9c46a;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>原神 聖遺物スコアチェッカー</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: linear-gradient(180deg, #1e1b2e, #2a2550);
+      color: #fff;
+      margin: 0;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 1.3rem;
+      text-align: center;
+    }
+    .box {
+      max-width: 520px;
+      margin: auto;
+      background: #2f2a55;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: none;
+      margin-top: 8px;
+    }
+    input {
+      background: #1f1c3a;
+      color: #fff;
+    }
+    button {
+      background: #ffcc66;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      opacity: .9;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+      background: #1a1730;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 12px;
+      font-size: .85rem;
+    }
+  </style>
 </head>
-
 <body>
-<h2>原神 聖遺物スコア</h2>
 
-<input id="uid" placeholder="UIDを入力">
-<button onclick="loadData()">取得</button>
+  <h1>🌟 原神 聖遺物スコアチェッカー</h1>
 
-<div id="output"></div>
+  <div class="box">
+    <label>UID</label>
+    <input id="uid" type="number" placeholder="UIDを入力" />
+
+    <button onclick="loadData()">取得</button>
+
+    <div id="output"></div>
+  </div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const savedUid = params.get("uid");
-if (savedUid) document.getElementById("uid").value = savedUid;
+/* ページ読み込み時：URLに uid があれば入力欄に入れるだけ */
+(() => {
+  const params = new URLSearchParams(location.search);
+  const savedUid = params.get("uid");
+  if (savedUid) {
+    document.getElementById("uid").value = savedUid;
+  }
+})();
 
-let CHAR_META = {};
-
-async function loadCharMeta() {
-  const res = await fetch(
-    "https://raw.githubusercontent.com/EnkaNetwork/API-docs/master/store/characters.json"
-  );
-  CHAR_META = await res.json();
-}
-
-function getRefStat(charId) {
-  const c = CHAR_META[charId];
-  if (!c) return "ATK";
-  if (c.baseHP > c.baseATK && c.baseHP > c.baseDEF) return "HP";
-  if (c.baseDEF > c.baseATK && c.baseDEF > c.baseHP) return "DEF";
-  return "ATK";
-}
-
-function scoreColor(score) {
-  const min = 20, max = 50;
-  const t = Math.max(0, Math.min(1, (score - min) / (max - min)));
-  const r = Math.round(255 * (1 - t));
-  const g = Math.round(180 * t);
-  return `rgb(${r},${g},60)`;
-}
-
+/* ★ 入力欄のUIDを必ず使う ★ */
 async function loadData() {
-  const uid = document.getElementById("uid").value;
-  history.replaceState(null, "", `?uid=${uid}`);
+  const uidInput = document.getElementById("uid").value.trim();
   const out = document.getElementById("output");
+
+  if (!uidInput) {
+    alert("UIDを入力してください");
+    return;
+  }
+
+  const uid = uidInput; // ← ここが最優先
+
+  // URLに保存（リロード用）
+  history.replaceState(null, "", `?uid=${uid}`);
+
   out.textContent = "取得中…";
+
+  try {
+    const res = await fetch(`https://enka.network/api/uid/${uid}`);
+    if (!res.ok) {
+      out.textContent = "Enka API エラー";
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!data.avatarInfoList) {
+      out.textContent = "取得失敗（キャラ詳細公開を確認）";
+      return;
+    }
+
+    /* まずは生データ表示（動作確認用） */
+    out.innerHTML = `
+      <p>✅ 取得成功</p>
+      <p>キャラ数：${data.avatarInfoList.length}</p>
+      <pre>${JSON.stringify(data.avatarInfoList[0], null, 2)}</pre>
+    `;
+
+  } catch (e) {
+    console.error(e);
+    out.textContent = "通信失敗";
+  }
+}
+</script>
+
+</body>
+</html>  out.textContent = "取得中…";
 
   try {
     await loadCharMeta();
