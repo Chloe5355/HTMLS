@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>原神 聖遺物スコア（完全版）</title>
+
+<style>
+body {
+  background: radial-gradient(circle at top, #1e2a44, #0b0f1a);
+  color: #f5f2eb;
+  font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+  padding: 12px;
+}
+h2 {
+  text-align: center;
+  color: #f6e7b2;
+}
+input, button {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 14px;
+  border: none;
+  margin-top: 10px;
+}
+input {
+  background: #1c2540;
+  color: #fff;
+}
+button {
+  background: linear-gradient(135deg, #e9c46a, #f4a261);
+  color: #2b1d0e;
+  font-weight: bold;
+}
+.card {
+  background: linear-gradient(180deg, #1b233d, #12182c);
+  border-radius: 18px;
+  padding: 14px;
+  margin-top: 16px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.6);
+}
+.char {
+  font-size: 20px;
+  font-weight: bold;
+  color: #f6e7b2;
+}
+.art {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  font-size: 15px;
+}
+.total {
+  margin-top: 10px;
+  font-size: 17px;
+  text-align: right;
+  color: #e9c46a;
+}
+</style>
+</head>
+
+<body>
+<h2>原神 聖遺物スコア</h2>
+
+<input id="uid" placeholder="UIDを入力">
+<button onclick="loadData()">取得</button>
+
+<div id="output"></div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const savedUid = params.get("uid");
+if (savedUid) document.getElementById("uid").value = savedUid;
+
+let CHAR_META = {};
+
+async function loadCharMeta() {
+  const res = await fetch(
+    "https://raw.githubusercontent.com/EnkaNetwork/API-docs/master/store/characters.json"
+  );
+  CHAR_META = await res.json();
+}
+
+function getRefStat(charId) {
+  const c = CHAR_META[charId];
+  if (!c) return "ATK";
+  if (c.baseHP > c.baseATK && c.baseHP > c.baseDEF) return "HP";
+  if (c.baseDEF > c.baseATK && c.baseDEF > c.baseHP) return "DEF";
+  return "ATK";
+}
+
+function scoreColor(score) {
+  const min = 20, max = 50;
+  const t = Math.max(0, Math.min(1, (score - min) / (max - min)));
+  const r = Math.round(255 * (1 - t));
+  const g = Math.round(180 * t);
+  return `rgb(${r},${g},60)`;
+}
+
+async function loadData() {
+  const uid = document.getElementById("uid").value;
+  history.replaceState(null, "", `?uid=${uid}`);
+  const out = document.getElementById("output");
+  out.textContent = "取得中…";
+
+  try {
+    await loadCharMeta();
+    const res = await fetch(`https://enka.network/api/uid/${uid}`);
+    const data = await res.json();
+    out.innerHTML = "";
+
+    for (const char of data.avatarInfoList) {
+      const meta = CHAR_META[char.avatarId];
+      const name = meta?.name || "不明キャラ";
+      const ref = getRefStat(char.avatarId);
+
+      let total = 0;
+      let expectSum = 0;
+      let count = 0;
+
+      let html = `<div class="card">
+        <div class="char">${name}（参照:${ref}）</div>`;
+
+      for (const e of char.equipList.filter(x => x.reliquary)) {
+        const r = calcScore(e.reliquary.substats || [], ref);
+        total += r.score;
+        expectSum += r.expect;
+        count++;
+
+        const judge =
+          r.score >= 40 ? "🌟 神" :
+          r.score >= 30 ? "👍 妥協" : "⚠ 微妙";
+
+        const dev = ((r.score - 30) + 50).toFixed(1);
+
+        html += `
+        <div class="art" style="color:${scoreColor(r.score)}">
+          スコア ${r.score.toFixed(1)} ｜ 偏差値 ${dev}<br>
+          期待値 ${r.expect.toFixed(1)} ｜ 🔥複合 ${r.hybrid.toFixed(1)}
+          ｜ ${judge}
+        </div>`;
+      }
+
+      html += `
+        <div class="total">
+          合計スコア ${total.toFixed(1)}<br>
+          平均期待値 ${(expectSum / count).toFixed(1)}
+        </div>
+      </div>`;
+
+      out.innerHTML += html;
+    }
+  } catch {
+    out.textContent = "取得失敗（キャラ詳細公開を確認）";
+  }
+}
+
+function calcScore(substats, ref) {
+  let score = 0, cr = 0, cd = 0, refPct = 0;
+
+  for (const s of substats) {
+    const v = s.statValue;
+    if (s.appendPropId === "FIGHT_PROP_CRITICAL") {
+      score += v * 2; cr += v;
+    } else if (s.appendPropId === "FIGHT_PROP_CRITICAL_HURT") {
+      score += v; cd += v;
+    } else if (ref === "ATK" && s.appendPropId === "FIGHT_PROP_ATTACK_PERCENT") {
+      score += v; refPct += v;
+    } else if (ref === "HP" && s.appendPropId === "FIGHT_PROP_HP_PERCENT") {
+      score += v; refPct += v;
+    } else if (ref === "DEF" && s.appendPropId === "FIGHT_PROP_DEFENSE_PERCENT") {
+      score += v; refPct += v;
+    }
+  }
+
+  const expect = cr * cd;
+  const hybrid = expect * (1 + refPct / 100);
+  return { score, expect, hybrid };
+}
+</script>
+</body>
+</html>
