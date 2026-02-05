@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黒×パープルピンクMP3プレイヤー＋ビジュアライザー</title>
+<style>
+/* ======= 基本スタイル ======= */
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background: #0a0a0a; /* 黒メイン */
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+h1 { 
+    margin: 20px 0;
+    color: #ff69b4; /* ピンク強めタイトル */
+}
+
+#player-container {
+    width: 90%;
+    max-width: 400px;
+    background: #1a1a1a; /* 黒系背景 */
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(255,105,180,0.5);
+    margin-bottom: 20px;
+}
+
+#controls {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 15px;
+}
+
+/* ======= CSSボタン ======= */
+.control-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #ff69b4; /* パープルピンク */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 0 10px #ff69b4;
+}
+.control-btn:active { 
+    transform: scale(0.9); 
+    box-shadow: 0 0 20px #ff69b4;
+}
+
+/* アイコン描画 */
+.play::before {
+    content:"";
+    display:block;
+    width:0;
+    height:0;
+    border-left:18px solid #fff;
+    border-top:10px solid transparent;
+    border-bottom:10px solid transparent;
+}
+
+.pause::before {
+    content:"";
+    display:block;
+    width:12px;
+    height:18px;
+    background:#fff;
+    box-shadow:18px 0 #fff;
+}
+
+.prev::before {
+    content:"";
+    display:block;
+    width:0;
+    height:0;
+    border-left:14px solid #fff;
+    border-top:10px solid transparent;
+    border-bottom:10px solid transparent;
+    transform: translateX(5px);
+}
+.prev::after {
+    content:"";
+    display:block;
+    width:0;
+    height:0;
+    border-left:14px solid #fff;
+    border-top:10px solid transparent;
+    border-bottom:10px solid transparent;
+    position:absolute;
+    left:-18px;
+}
+
+.next::before {
+    content:"";
+    display:block;
+    width:0;
+    height:0;
+    border-left:14px solid #fff;
+    border-top:10px solid transparent;
+    border-bottom:10px solid transparent;
+}
+.next::after {
+    content:"";
+    display:block;
+    width:0;
+    height:0;
+    border-left:14px solid #fff;
+    border-top:10px solid transparent;
+    border-bottom:10px solid transparent;
+    position:absolute;
+    left:18px;
+}
+
+.loop::before {
+    content:"⟳";
+    font-size: 20px;
+    color: #fff;
+}
+
+/* ======= シークバー ======= */
+#seekBar {
+    width: 100%;
+    margin-top: 15px;
+    accent-color: #ff69b4; /* ピンク強め */
+}
+
+#title {
+    margin-top: 10px;
+    font-size: 14px;
+    text-align: center;
+    color: #ff69b4;
+}
+
+/* ======= プレイリスト ======= */
+#playlist {
+    width: 90%;
+    max-width: 400px;
+    margin-bottom: 20px;
+}
+
+#playlist li {
+    list-style: none;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 5px;
+    background: #2a2a2a; /* 黒系 */
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#playlist li:hover { background: #ff69b4; }
+#playlist li.active { background: #ff69b4; }
+
+/* ======= ビジュアライザー ======= */
+#visualizer-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#central-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: url('https://drive.google.com/uc?export=view&id=1erVVWAnYhUbTadXXbbYz_lM5FFbfPtiC') center/cover no-repeat;
+    z-index: 2;
+}
+
+.orbit {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #ff69b4;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+}
+
+audio { display: none; }
+
+</style>
+</head>
+<body>
+
+<h1>黒×パープルピンクMP3プレイヤー</h1>
+
+<div id="player-container">
+    <div id="title">曲タイトル: なし</div>
+
+    <input type="range" id="seekBar" min="0" max="100" value="0">
+
+    <div id="controls">
+        <div class="control-btn prev" id="prevBtn"></div>
+        <div class="control-btn play" id="playBtn"></div>
+        <div class="control-btn pause" id="pauseBtn"></div>
+        <div class="control-btn next" id="nextBtn"></div>
+        <div class="control-btn loop" id="loopBtn"></div>
+    </div>
+
+    <div id="visualizer-container"></div>
+    <div id="central-image"></div>
+</div>
+
+<ul id="playlist"></ul>
+
+<audio id="audioPlayer" crossorigin="anonymous"></audio>
+
+<script>
+/* ======= プレイヤー操作 ======= */
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const loopBtn = document.getElementById('loopBtn');
+const seekBar = document.getElementById('seekBar');
+const titleEl = document.getElementById('title');
+const playlistEl = document.getElementById('playlist');
+
+let playlist = ["song1.mp3","song2.mp3","song3.mp3"];
+let currentIndex = 0;
+let loop = false;
+
+/* ======= ボタン操作 ======= */
+playBtn.addEventListener('click', ()=> audio.play());
+pauseBtn.addEventListener('click', ()=> audio.pause());
+prevBtn.addEventListener('click', prevSong);
+nextBtn.addEventListener('click', nextSong);
+loopBtn.addEventListener('click', ()=> { loop = !loop; alert("ループ: " + (loop?"ON":"OFF")); });
+
+function loadSong(index){
+    audio.src = playlist[index];
+    audio.play();
+    titleEl.innerText = "曲タイトル: " + playlist[index];
+    highlightPlaylist();
+}
+
+function nextSong(){
+    if(currentIndex < playlist.length-1){ currentIndex++; loadSong(currentIndex); }
+    else if(loop){ currentIndex = 0; loadSong(currentIndex); }
+}
+
+function prevSong(){
+    if(currentIndex > 0){ currentIndex--; loadSong(currentIndex); }
+    else if(loop){ currentIndex = playlist.length-1; loadSong(currentIndex); }
+}
+
+audio.addEventListener('ended', nextSong);
+
+/* ======= シークバー ======= */
+audio.addEventListener('timeupdate', ()=> { seekBar.value = (audio.currentTime/audio.duration)*100; });
+seekBar.addEventListener('input', ()=> { audio.currentTime = (seekBar.value/100)*audio.duration; });
+
+/* ======= プレイリスト表示 ======= */
+function renderPlaylist(){
+    playlistEl.innerHTML="";
+    playlist.forEach((song, idx)=>{
+        const li = document.createElement('li');
+        li.innerText = song;
+        li.addEventListener('click', ()=> { currentIndex = idx; loadSong(idx); });
+        playlistEl.appendChild(li);
+    });
+    highlightPlaylist();
+}
+
+function highlightPlaylist(){
+    [...playlistEl.children].forEach((li, idx)=> li.classList.toggle('active', idx === currentIndex));
+}
+
+renderPlaylist();
+loadSong(currentIndex);
+
+/* ======= Web Audio APIビジュアライザー ======= */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const analyser = audioCtx.createAnalyser();
+const source = audioCtx.createMediaElementSource(audio);
+source.connect(analyser);
+analyser.connect(audioCtx.destination);
+analyser.fftSize = 64;
+
+const bufferLength = analyser.frequencyBinCount;
+const dataArray = new Uint8Array(bufferLength);
+
+const numOrbits = bufferLength;
+const orbits = [];
+const container = document.getElementById('visualizer-container');
+
+for(let i=0;i<numOrbits;i++){
+    const div = document.createElement('div');
+    div.classList.add('orbit');
+    container.appendChild(div);
+    orbits.push(div);
+}
+
+let angle = 0;
+function animateVisualizer(){
+    analyser.getByteFrequencyData(dataArray);
+    const radius = 80;
+    orbits.forEach((el,i)=>{
+        const a = angle + i*(2*Math.PI/orbits.length);
+        const offset = dataArray[i]/255*60;
+        const size = 5 + dataArray[i]/255*20;
+        el.style.width = `${size}px`;
+        el.style.height = `${size}px`;
+        el.style.background = `#ff69b4`;
+        const x = radius*Math.cos(a) + offset;
+        const y = radius*Math.sin(a) + offset;
+        el.style.transform = `translate(${x}px, ${y}px)`;
+    });
+    angle += 0.02;
+    requestAnimationFrame(animateVisualizer);
+}
+animateVisualizer();
+</script>
+
+</body>
+</html>
