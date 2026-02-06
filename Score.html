@@ -3,264 +3,225 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 <title>Genshin Build Analyzer</title>
 
-<!-- =======================
-  STYLE
-======================= -->
 <style>
 :root {
-  --bg: #0f172a;
-  --card: rgba(30, 41, 59, 0.85);
-  --accent: #38bdf8;
-  --gold: #facc15;
-  --text: #e5e7eb;
-  --sub: #94a3b8;
-  --danger: #f87171;
+  --bg:#020617;
+  --card:rgba(30,41,59,.85);
+  --text:#e5e7eb;
+  --sub:#94a3b8;
+  --gold:#facc15;
+  --accent:#38bdf8;
 }
 
 body {
-  margin: 0;
-  background: linear-gradient(180deg, #020617, #0f172a);
-  color: var(--text);
-  font-family: system-ui, -apple-system;
+  margin:0;
+  background:linear-gradient(180deg,#020617,#0f172a);
+  color:var(--text);
+  font-family:system-ui,-apple-system;
 }
 
-/* Header */
 header {
-  padding: 12px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding:12px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-select,
 input {
-  background: var(--card);
-  color: var(--text);
-  border: none;
-  border-radius: 12px;
-  padding: 8px 12px;
+  background:var(--card);
+  border:none;
+  border-radius:12px;
+  padding:8px 12px;
+  color:var(--text);
 }
 
-/* Card */
 .card {
-  background: var(--card);
-  border-radius: 18px;
-  padding: 16px;
-  margin: 12px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  background:var(--card);
+  margin:12px;
+  padding:16px;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
 }
 
-.title {
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-/* Character */
 .char-header {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+  display:flex;
+  gap:12px;
+  align-items:center;
 }
 
 .char-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
-  background: #1e293b;
+  width:56px;
+  height:56px;
+  border-radius:12px;
+  background:#1e293b;
 }
 
 .rank {
-  font-size: 36px;
-  font-weight: 900;
-  color: var(--gold);
+  font-size:32px;
+  font-weight:900;
 }
+
+.rank.S { color:#facc15 }
+.rank.A { color:#60a5fa }
+.rank.B { color:#a3e635 }
+.rank.C { color:#f87171 }
 
 .score {
-  font-size: 24px;
-  font-weight: 700;
+  font-size:22px;
+  font-weight:700;
+  margin-left:8px;
 }
 
-/* Rows */
-.row {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
-}
-
-.warn {
-  color: var(--danger);
-}
-
-/* Footer */
 .footer {
-  margin-top: 40px;
-  padding: 28px 12px 36px;
-  background: linear-gradient(
-    180deg,
-    rgba(2, 6, 23, 0),
-    rgba(2, 6, 23, 0.95)
-  );
-  color: var(--sub);
-  font-size: 12px;
-  text-align: center;
-}
-
-.footer-inner {
-  max-width: 520px;
-  margin: 0 auto;
-  line-height: 1.7;
-}
-
-.footer .author {
-  margin-top: 10px;
-  font-weight: 600;
-  color: var(--text);
+  margin-top:40px;
+  padding:28px 12px 36px;
+  font-size:12px;
+  text-align:center;
+  color:var(--sub);
 }
 </style>
 </head>
 
 <body>
 
-<!-- =======================
-  HEADER
-======================= -->
 <header>
-  <div data-i18n="app_title">原神ビルド解析</div>
-  <div>
-    <input id="uidInput" placeholder="UID" maxlength="9" />
-    <select id="langSelect">
-      <option value="ja">日本語</option>
-      <option value="en">English</option>
-    </select>
-  </div>
+  <div>原神ビルド解析</div>
+  <input id="uidInput" placeholder="UID入力" maxlength="9" />
 </header>
 
-<!-- =======================
-  CHARACTER CARD
-======================= -->
-<div class="card">
-  <div class="char-header">
-    <div class="char-icon"></div>
-    <div>
-      <div class="title">夜蘭</div>
-      <div data-i18n="preset">HP＋元素チャージ重視</div>
-    </div>
-  </div>
+<div id="characterList"></div>
 
-  <div style="margin-top:12px">
-    <span class="rank">S</span>
-    <span class="score">82.3%</span>
-  </div>
-</div>
-
-<!-- =======================
-  BUILD SCORE
-======================= -->
-<div class="card">
-  <div class="title" data-i18n="build_score">ビルド評価</div>
-  <div data-i18n="build_desc">
-    キャラ固有プリセットに基づく総合スコア
-  </div>
-</div>
-
-<!-- =======================
-  AI ADVICE
-======================= -->
-<div class="card">
-  <div class="title">🤖 AI</div>
-  <div data-i18n="ai_advice">
-    元素チャージ効率を優先して更新するとDPSが向上します
-  </div>
-</div>
-
-<!-- =======================
-  ARTIFACT ANALYSIS
-======================= -->
-<div class="card">
-  <div class="title" data-i18n="artifact">聖遺物分析</div>
-  <div class="row">🌸 花 <span>42.1</span></div>
-  <div class="row warn">👑 冠 <span>28.4</span></div>
-</div>
-
-<!-- =======================
-  FOOTER
-======================= -->
 <footer class="footer">
-  <div class="footer-inner">
-    <div data-i18n="footer_text">
-      非公式 原神ビルド解析ツール<br>
-      Enka.Network API / miHoYo TextMap 使用
-    </div>
-
-    <div class="author">
-      作者: @Chloe
-    </div>
-
-    <div>
-      Genshin Impact © COGNOSPHERE / HoYoverse
-    </div>
-  </div>
+  非公式 原神ビルド解析ツール<br>
+  Enka.Network API / miHoYo TextMap 使用<br>
+  作者: @Chloe<br>
+  Genshin Impact © COGNOSPHERE / HoYoverse
 </footer>
 
-<!-- =======================
-  SCRIPT
-======================= -->
 <script>
-/* ===== 多言語 TextMap ===== */
-const i18n = {
-  ja: {
-    app_title: "原神ビルド解析",
-    preset: "HP＋元素チャージ重視",
-    build_score: "ビルド評価",
-    build_desc: "キャラ固有プリセットに基づく総合スコア",
-    ai_advice: "元素チャージ効率を優先して更新するとDPSが向上します",
-    artifact: "聖遺物分析",
-    footer_text:
-      "非公式 原神ビルド解析ツール<br>Enka.Network API / miHoYo TextMap 使用"
-  },
-  en: {
-    app_title: "Genshin Build Analyzer",
-    preset: "HP & Energy Recharge Focus",
-    build_score: "Build Score",
-    build_desc: "Overall score based on character presets",
-    ai_advice:
-      "Improving Energy Recharge will increase overall DPS",
-    artifact: "Artifact Analysis",
-    footer_text:
-      "Unofficial Genshin Impact build analysis tool<br>Powered by Enka.Network API / miHoYo TextMap"
-  }
-};
+/* =========================
+  聖遺物スコア計算
+========================= */
+/*
+  基準：
+  会心率 ×2
+  会心ダメ ×1
+  攻撃% / HP% / 防御% ×1
+  元素チャージ ×1
+*/
+function calcArtifactScore(artifact) {
+  let score = 0;
 
-/* ===== Language Switch ===== */
-function setLanguage(lang) {
-  document.documentElement.lang = lang;
-  document.querySelectorAll("[data-i18n]").forEach(el => {
-    const key = el.dataset.i18n;
-    if (i18n[lang][key]) {
-      el.innerHTML = i18n[lang][key];
+  artifact.flat.reliquarySubstats?.forEach(sub => {
+    const v = sub.statValue;
+    switch (sub.appendPropId) {
+      case "FIGHT_PROP_CRITICAL":
+        score += v * 2;
+        break;
+      case "FIGHT_PROP_CRITICAL_HURT":
+        score += v;
+        break;
+      case "FIGHT_PROP_ATTACK_PERCENT":
+      case "FIGHT_PROP_HP_PERCENT":
+      case "FIGHT_PROP_DEFENSE_PERCENT":
+      case "FIGHT_PROP_CHARGE_EFFICIENCY":
+        score += v;
+        break;
     }
   });
-  localStorage.setItem("lang", lang);
+
+  return score;
 }
 
-const savedLang = localStorage.getItem("lang") || "ja";
-document.getElementById("langSelect").value = savedLang;
-setLanguage(savedLang);
+/* =========================
+  キャラスコア算出
+========================= */
+function calcCharacterScore(char) {
+  let total = 0;
+  let count = 0;
 
-document.getElementById("langSelect")
-  .addEventListener("change", e => {
-    setLanguage(e.target.value);
+  char.equipList.forEach(equip => {
+    if (equip.flat?.itemType === "ITEM_RELIQUARY") {
+      total += calcArtifactScore(equip);
+      count++;
+    }
   });
 
-/* ===== UID Placeholder ===== */
+  const avg = count ? total / count : 0;
+  return avg;
+}
+
+function rankFromScore(score) {
+  if (score >= 40) return "S";
+  if (score >= 30) return "A";
+  if (score >= 20) return "B";
+  return "C";
+}
+
+/* =========================
+  Enka取得
+========================= */
+async function fetchEnka(uid) {
+  const res = await fetch(`https://enka.network/api/uid/${uid}`);
+  if (!res.ok) return null;
+  return await res.json();
+}
+
+/* =========================
+  描画
+========================= */
+function renderCharacters(data) {
+  const list = document.getElementById("characterList");
+  list.innerHTML = "";
+
+  if (!data.avatarInfoList) {
+    list.innerHTML = "<div class='card'>キャラ詳細が非公開です</div>";
+    return;
+  }
+
+  data.avatarInfoList.forEach(char => {
+    const score = calcCharacterScore(char);
+    const rank = rankFromScore(score);
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="char-header">
+        <div class="char-icon"></div>
+        <div>
+          <div>Avatar ID: ${char.avatarId}</div>
+          <div>Lv.${char.propMap["4001"].val}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <span class="rank ${rank}">${rank}</span>
+        <span class="score">${score.toFixed(1)}</span>
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
+}
+
+/* =========================
+  UID入力
+========================= */
 document.getElementById("uidInput")
-  .addEventListener("change", e => {
-    console.log("UID:", e.target.value);
-    // Enka API fetch here
+  .addEventListener("change", async e => {
+    const uid = e.target.value.trim();
+    if (!uid) return;
+
+    const data = await fetchEnka(uid);
+    if (!data) {
+      alert("取得できませんでした");
+      return;
+    }
+
+    renderCharacters(data);
   });
 </script>
 
