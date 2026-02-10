@@ -92,10 +92,10 @@ button:disabled {
 
 <div class="card">
   <div id="flag" class="flag">🌍</div>
-  <div id="country" class="country">世界</div>
-  <div id="greeting" class="greeting">おはよう！</div>
+  <div id="country" class="country">今日の</div>
+  <div id="greeting" class="greeting">おはよう</div>
 
-  <button id="drawBtn" type="button" onclick="drawGreeting()">今日の世界おはよう</button>
+  <button id="drawBtn" type="button" onclick="drawGreeting()">おちてね</button>
 
   <div class="progress-bar">
     <div id="progressFill" class="progress-fill"></div>
@@ -204,8 +204,8 @@ function checkReset(){
     localStorage.removeItem(TIME_KEY);
 
     document.getElementById("flag").textContent = "🌍";
-    document.getElementById("country").textContent = "世界";
-    document.getElementById("greeting").textContent = "おはよう！";
+    document.getElementById("country").textContent = "今日の";
+    document.getElementById("greeting").textContent = "おはよう";
 
     updateProgress(0);
     updateButtonState();
