@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>世界おはよう祈願</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Hiragino Mincho ProN","Yu Mincho",serif;
+  background: linear-gradient(180deg,#1e1b4b,#312e81);
+  color: white;
+}
+
+.card {
+  max-width: 360px;
+  margin: 40px auto;
+  padding: 20px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 20px;
+  text-align: center;
+}
+
+.flag { font-size: 64px; }
+.country { font-size: 18px; margin-top: 6px; }
+.greeting { font-size: 20px; margin: 12px 0 16px; }
+
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  font-weight: bold;
+  background: linear-gradient(180deg, #fde68a, #facc15);
+  color: #1e1b4b;
+}
+
+.progress-bar {
+  position: relative;
+  height: 26px;
+  margin-top: 14px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.progress-fill {
+  position: absolute;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #fde68a, #facc15);
+  transition: width 0.6s ease;
+}
+
+.progress-label {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1e1b4b;
+  font-weight: bold;
+  white-space: nowrap;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <div id="flag" class="flag">🌍</div>
+  <div id="country" class="country">世界</div>
+  <div id="greeting" class="greeting">おはよう！</div>
+
+  <button onclick="drawGreeting()">今日の世界おはよう</button>
+
+  <div class="progress-bar">
+    <div id="progressFill" class="progress-fill"></div>
+    <div id="progressLabel" class="progress-label"></div>
+  </div>
+</div>
+
+<script>
+const USED_KEY = "usedCountries";
+const CLEAR_COUNT_KEY = "clearCount";
+let greetings = [];
+
+/* JSON読み込み */
+async function loadGreetings() {
+  const res = await fetch("greetings.json");
+  greetings = await res.json();
+  const used = JSON.parse(localStorage.getItem(USED_KEY)) || [];
+  updateProgress(used.length);
+}
+
+/* 称号判定 */
+function getTitle(clearCount){
+  if(clearCount>=4) return "🌍 世界制覇者";
+  if(clearCount>=2) return "🧭 探検王";
+  return "🌱 旅人";
+}
+
+/* 進捗バー更新 */
+function updateProgress(count){
+  const total = greetings.length;
+  const remain = total - count;
+  const percent = Math.round((count/total)*100);
+  const clearCount = Number(localStorage.getItem(CLEAR_COUNT_KEY))||0;
+  const loop = clearCount+1;
+  const title = getTitle(clearCount);
+
+  document.getElementById("progressFill").style.width = percent+"%";
+  const label = document.getElementById("progressLabel");
+  label.textContent = remain===0
+    ? `🌟 全世界制覇！ ${loop}周目｜${title}`
+    : `🌍 ${count}/${total}｜${loop}周目｜${title}（残り${remain}）`;
+}
+
+/* 周回加算 */
+function incrementClear(){
+  const c = Number(localStorage.getItem(CLEAR_COUNT_KEY))||0;
+  localStorage.setItem(CLEAR_COUNT_KEY, c+1);
+}
+
+/* おはよう取得 */
+function drawGreeting(){
+  let used = JSON.parse(localStorage.getItem(USED_KEY)) || [];
+  if(used.length === greetings.length){
+    incrementClear();
+    used = [];
+    localStorage.removeItem(USED_KEY);
+  }
+
+  const unused = greetings.filter((_,i)=>!used.includes(i));
+  const g = unused[Math.floor(Math.random()*unused.length)];
+  const idx = greetings.indexOf(g);
+  used.push(idx);
+
+  localStorage.setItem(USED_KEY, JSON.stringify(used));
+
+  document.getElementById("flag").textContent = g.flag;
+  document.getElementById("country").textContent = g.country;
+  document.getElementById("greeting").textContent = g.text;
+
+  updateProgress(used.length);
+}
+
+window.addEventListener("DOMContentLoaded", loadGreetings);
+</script>
+
+</body>
+</html>
