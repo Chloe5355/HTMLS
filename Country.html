@@ -11,18 +11,19 @@ body {
   font-family: "Hiragino Mincho ProN","Yu Mincho",serif;
   background: linear-gradient(180deg,#1e1b4b,#312e81);
   color: white;
-}
-
-.card {
-  max-width: 360px;
-  margin: 40px auto;
-  padding: 20px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 20px;
   text-align: center;
 }
 
-.flag { font-size: 64px; }
+.flag { 
+  height: 64px; 
+  width: 64px;          /* 高さと幅を同じにして円形に */
+  display: block; 
+  margin: 0 auto 10px; 
+  border-radius: 50%;   /* 円形 */
+  object-fit: cover;     /* 縦横比を保って切り抜き */
+  border: 2px solid #fde68a; /* optional: 円の縁を黄色に */
+}
+
 .country { font-size: 18px; margin-top: 6px; }
 .greeting { font-size: 20px; margin: 12px 0 16px; }
 
@@ -46,7 +47,8 @@ button:disabled {
 .progress-bar {
   position: relative;
   height: 26px;
-  margin-top: 14px;
+  margin: 14px auto;
+  max-width: 360px;
   background: rgba(255,255,255,0.25);
   border-radius: 999px;
   overflow: hidden;
@@ -75,7 +77,8 @@ button:disabled {
 
 .reset-form {
   display: flex;
-  margin-top: 8px;
+  max-width: 360px;
+  margin: 8px auto;
 }
 
 .reset-form input {
@@ -89,7 +92,10 @@ button:disabled {
 </head>
 
 <body>
-  <div id="flag" class="flag">🌍</div>
+
+  <!-- 円形画像 -->
+  <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/Columbina.png">
+
   <div id="country" class="country">今日の</div>
   <div id="greeting" class="greeting">おはよう</div>
 
@@ -105,7 +111,6 @@ button:disabled {
     <input type="text" id="resetInput" placeholder=" ">
     <button type="button" onclick="checkReset()">リセット</button>
   </div>
-</div>
 
 <script>
 const USED_KEY = "usedCountries";
@@ -115,7 +120,6 @@ const LIMIT_HOURS = 12;
 
 let greetings = [];
 
-/* JSON読み込み */
 async function loadGreetings() {
   const res = await fetch("Country.json");
   greetings = await res.json();
@@ -125,18 +129,16 @@ async function loadGreetings() {
   setInterval(updateButtonState, 60*1000);
 }
 
-/* 称号判定 */
 function getTitle(clearCount){
   if(clearCount>=4) return "🌍 世界制覇者";
   if(clearCount>=2) return "🧭 探検王";
   return "🌱 旅人";
 }
 
-/* 進捗バー更新 */
 function updateProgress(count){
   const total = greetings.length;
   const remain = total - count;
-  const percent = Math.round((count/total)*100);
+  const percent = total ? Math.round((count/total)*100) : 0;
   const clearCount = Number(localStorage.getItem(CLEAR_COUNT_KEY))||0;
   const loop = clearCount+1;
   const title = getTitle(clearCount);
@@ -148,7 +150,6 @@ function updateProgress(count){
     : `🌍 ${count}/${total}｜${loop}周目｜${title}（残り${remain}）`;
 }
 
-/* ボタン制限チェック */
 function updateButtonState(){
   const btn = document.getElementById("drawBtn");
   const last = localStorage.getItem(TIME_KEY);
@@ -158,16 +159,14 @@ function updateButtonState(){
   btn.disabled = elapsed < LIMIT_HOURS*60*60*1000;
 }
 
-/* 周回加算 */
 function incrementClear(){
   const c = Number(localStorage.getItem(CLEAR_COUNT_KEY))||0;
   localStorage.setItem(CLEAR_COUNT_KEY, c+1);
 }
 
-/* おはよう取得 */
 function drawGreeting(){
   const btn = document.getElementById("drawBtn");
-  if(btn.disabled) return; // 12時間制限チェック
+  if(btn.disabled) return;
 
   let used = JSON.parse(localStorage.getItem(USED_KEY)) || [];
 
@@ -185,7 +184,8 @@ function drawGreeting(){
   localStorage.setItem(USED_KEY, JSON.stringify(used));
   localStorage.setItem(TIME_KEY, Date.now());
 
-  document.getElementById("flag").textContent = g.flag;
+  // flag を画像として扱う
+  document.getElementById("flag").src = g.flag;
   document.getElementById("country").textContent = g.country;
   document.getElementById("greeting").textContent = g.text;
 
@@ -193,7 +193,6 @@ function drawGreeting(){
   updateButtonState();
 }
 
-/* リセット判定 */
 function checkReset(){
   const input = document.getElementById("resetInput").value.trim().toLowerCase();
   if(input === "reset"){
@@ -201,7 +200,8 @@ function checkReset(){
     localStorage.removeItem(CLEAR_COUNT_KEY);
     localStorage.removeItem(TIME_KEY);
 
-    document.getElementById("flag").textContent = "🌍";
+    // flag を初期画像に戻す
+    document.getElementById("flag").src = "https://chloe5355.github.io/HTMLS/Columbina.png";
     document.getElementById("country").textContent = "今日の";
     document.getElementById("greeting").textContent = "おはよう";
 
