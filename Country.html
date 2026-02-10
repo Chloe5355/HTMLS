@@ -36,6 +36,12 @@ button {
   color: #1e1b4b;
 }
 
+button:disabled {
+  background: #9ca3af;
+  color: #1f2937;
+  cursor: not-allowed;
+}
+
 .progress-bar {
   position: relative;
   height: 26px;
@@ -75,7 +81,7 @@ button {
   <div id="country" class="country">世界</div>
   <div id="greeting" class="greeting">おはよう！</div>
 
-  <button onclick="drawGreeting()">今日の世界おはよう</button>
+  <button id="drawBtn" onclick="drawGreeting()">今日の世界おはよう</button>
 
   <div class="progress-bar">
     <div id="progressFill" class="progress-fill"></div>
@@ -86,14 +92,19 @@ button {
 <script>
 const USED_KEY = "usedCountries";
 const CLEAR_COUNT_KEY = "clearCount";
+const TIME_KEY = "lastGreetingTime";
+const LIMIT_HOURS = 12;
+
 let greetings = [];
 
 /* JSON読み込み */
 async function loadGreetings() {
-  const res = await fetch("Country.json"); // ← ファイル名変更
+  const res = await fetch("Country.json");
   greetings = await res.json();
   const used = JSON.parse(localStorage.getItem(USED_KEY)) || [];
   updateProgress(used.length);
+  updateButtonState();
+  setInterval(updateButtonState, 60*1000);
 }
 
 /* 称号判定 */
@@ -119,6 +130,20 @@ function updateProgress(count){
     : `🌍 ${count}/${total}｜${loop}周目｜${title}（残り${remain}）`;
 }
 
+/* ボタン制限チェック */
+function updateButtonState(){
+  const btn = document.getElementById("drawBtn");
+  const last = localStorage.getItem(TIME_KEY);
+  if(!last) { btn.disabled = false; return; }
+
+  const elapsed = Date.now() - Number(last);
+  if(elapsed < LIMIT_HOURS*60*60*1000){
+    btn.disabled = true;
+  } else {
+    btn.disabled = false;
+  }
+}
+
 /* 周回加算 */
 function incrementClear(){
   const c = Number(localStorage.getItem(CLEAR_COUNT_KEY))||0;
@@ -128,6 +153,7 @@ function incrementClear(){
 /* おはよう取得 */
 function drawGreeting(){
   let used = JSON.parse(localStorage.getItem(USED_KEY)) || [];
+
   if(used.length === greetings.length){
     incrementClear();
     used = [];
@@ -140,12 +166,14 @@ function drawGreeting(){
   used.push(idx);
 
   localStorage.setItem(USED_KEY, JSON.stringify(used));
+  localStorage.setItem(TIME_KEY, Date.now());
 
   document.getElementById("flag").textContent = g.flag;
   document.getElementById("country").textContent = g.country;
   document.getElementById("greeting").textContent = g.text;
 
   updateProgress(used.length);
+  updateButtonState();
 }
 
 window.addEventListener("DOMContentLoaded", loadGreetings);
