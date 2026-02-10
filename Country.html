@@ -90,7 +90,7 @@ let greetings = [];
 
 /* JSON読み込み */
 async function loadGreetings() {
-  const res = await fetch("greetings.json");
+  const res = await fetch("Country.json"); // ← ファイル名変更
   greetings = await res.json();
   const used = JSON.parse(localStorage.getItem(USED_KEY)) || [];
   updateProgress(used.length);
