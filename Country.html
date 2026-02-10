@@ -92,7 +92,8 @@ button:disabled {
 </head>
 
 <body>
-  <img src=″https://raw.githubusercontent.com/Chloe5355/HTMLS/refs/heads/main/Columbina.png″ id="flag" class="flag"></img>
+  <img src=″https://raw.githubusercontent.com/Chloe5355/HTMLS/refs/heads/main/Columbina.png″></img>
+  <div id="flag" class="flag″>🌍</div>
   <div id="country" class="country">今日の</div>
   <div id="greeting" class="greeting">おはよう</div>
 
@@ -204,7 +205,7 @@ function checkReset(){
     localStorage.removeItem(CLEAR_COUNT_KEY);
     localStorage.removeItem(TIME_KEY);
 
-    document.getElementById("flag").src = "https://raw.githubusercontent.com/Chloe5355/HTMLS/refs/heads/main/Columbina.png";
+    document.getElementById("flag").textContent = "🌍";
     document.getElementById("country").textContent = "今日の";
     document.getElementById("greeting").textContent = "おはよう";
 
