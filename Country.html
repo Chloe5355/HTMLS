@@ -34,6 +34,7 @@ button {
   font-weight: bold;
   background: linear-gradient(180deg, #fde68a, #facc15);
   color: #1e1b4b;
+  margin-top: 8px;
 }
 
 button:disabled {
@@ -71,6 +72,19 @@ button:disabled {
   font-weight: bold;
   white-space: nowrap;
 }
+
+.reset-form {
+  display: flex;
+  margin-top: 8px;
+}
+
+.reset-form input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 999px;
+  border: none;
+  margin-right: 4px;
+}
 </style>
 </head>
 
@@ -86,6 +100,12 @@ button:disabled {
   <div class="progress-bar">
     <div id="progressFill" class="progress-fill"></div>
     <div id="progressLabel" class="progress-label"></div>
+  </div>
+
+  <!-- リセットフォーム -->
+  <div class="reset-form">
+    <input type="text" id="resetInput" placeholder="reset と入力">
+    <button onclick="checkReset()">リセット</button>
   </div>
 </div>
 
@@ -104,6 +124,96 @@ async function loadGreetings() {
   const used = JSON.parse(localStorage.getItem(USED_KEY)) || [];
   updateProgress(used.length);
   updateButtonState();
+  setInterval(updateButtonState, 60*1000);
+}
+
+/* 称号判定 */
+function getTitle(clearCount){
+  if(clearCount>=4) return "🌍 世界制覇者";
+  if(clearCount>=2) return "🧭 探検王";
+  return "🌱 旅人";
+}
+
+/* 進捗バー更新 */
+function updateProgress(count){
+  const total = greetings.length;
+  const remain = total - count;
+  const percent = Math.round((count/total)*100);
+  const clearCount = Number(localStorage.getItem(CLEAR_COUNT_KEY))||0;
+  const loop = clearCount+1;
+  const title = getTitle(clearCount);
+
+  document.getElementById("progressFill").style.width = percent+"%";
+  const label = document.getElementById("progressLabel");
+  label.textContent = remain===0
+    ? `🌟 全世界制覇！ ${loop}周目｜${title}`
+    : `🌍 ${count}/${total}｜${loop}周目｜${title}（残り${remain}）`;
+}
+
+/* ボタン制限チェック */
+function updateButtonState(){
+  const btn = document.getElementById("drawBtn");
+  const last = localStorage.getItem(TIME_KEY);
+  if(!last) { btn.disabled = false; return; }
+
+  const elapsed = Date.now() - Number(last);
+  btn.disabled = elapsed < LIMIT_HOURS*60*60*1000;
+}
+
+/* 周回加算 */
+function incrementClear(){
+  const c = Number(localStorage.getItem(CLEAR_COUNT_KEY))||0;
+  localStorage.setItem(CLEAR_COUNT_KEY, c+1);
+}
+
+/* おはよう取得 */
+function drawGreeting(){
+  let used = JSON.parse(localStorage.getItem(USED_KEY)) || [];
+
+  if(used.length === greetings.length){
+    incrementClear();
+    used = [];
+    localStorage.removeItem(USED_KEY);
+  }
+
+  const unused = greetings.filter((_,i)=>!used.includes(i));
+  const g = unused[Math.floor(Math.random()*unused.length)];
+  const idx = greetings.indexOf(g);
+  used.push(idx);
+
+  localStorage.setItem(USED_KEY, JSON.stringify(used));
+  localStorage.setItem(TIME_KEY, Date.now());
+
+  document.getElementById("flag").textContent = g.flag;
+  document.getElementById("country").textContent = g.country;
+  document.getElementById("greeting").textContent = g.text;
+
+  updateProgress(used.length);
+  updateButtonState();
+}
+
+/* リセット判定 */
+function checkReset(){
+  const input = document.getElementById("resetInput").value.trim();
+  if(input === "reset"){
+    localStorage.removeItem(USED_KEY);
+    localStorage.removeItem(CLEAR_COUNT_KEY);
+    localStorage.removeItem(TIME_KEY);
+    updateProgress(0);
+    updateButtonState();
+    document.getElementById("flag").textContent = "🌍";
+    document.getElementById("country").textContent = "世界";
+    document.getElementById("greeting").textContent = "おはよう！";
+    document.getElementById("resetInput").value = "";
+    alert("リセットしました！");
+  }
+}
+
+window.addEventListener("DOMContentLoaded", loadGreetings);
+</script>
+
+</body>
+</html>  updateButtonState();
   setInterval(updateButtonState, 60*1000);
 }
 
