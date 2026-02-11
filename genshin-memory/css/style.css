@@ -21,18 +21,19 @@ body {
 
 h1 { margin-bottom: 10px; }
 
-/* タイトル画像 */
+/* タイトル画像 - PC用 */
 .flag {
   width: 128px; 
   max-width: 20vw;
   border-radius: 50%; 
-  border: 1.5px solid black;       /* 黒い枠線を1.5pxに変更 */
+  border: 1.5px solid black;       /* 黒い枠線 */
   margin: 20px 0.2px;              /* 上下20px、左右0.2pxの余白 */
   display: block;
   margin-left: auto;
   margin-right: auto;              /* 中央配置 */
 }
 
+/* 盤面 */
 .board {
   display: grid;
   grid-template-columns: repeat(var(--grid-size), 1fr);
@@ -106,6 +107,16 @@ ul { padding-left:20px; text-align:left; }
 /* スマホ対応 */
 @media(max-width:600px){
   body { font-size: 16px; }
+  
+  /* タイトル画像 - スマホ用 */
+  .flag {
+    width: 80px;       /* 幅を少し小さく */
+    max-width: 30vw;   /* 画面幅の30%まで */
+    border-radius: 50%;
+    border: 1.5px solid black;
+    margin: 20px 0.2px;
+  }
+  
   .card { 
     font-size: calc(18px / (4 / var(--grid-size))); 
     width: calc(90vw / var(--grid-size)); 
