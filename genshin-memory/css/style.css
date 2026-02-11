@@ -21,14 +21,16 @@ body {
 
 h1 { margin-bottom: 10px; }
 
+/* タイトル画像 */
 .flag {
   width: 100px; 
   max-width: 20vw;
   border-radius: 50%; 
-  margin: 0.25px;   /* 画像周りの余白 */
+  border: 2px solid black;  /* ← 黒色の枠線 */
+  margin: 0.25px;            /* 画像周りの余白 */
   display: block;
   margin-left: auto;
-  margin-right: auto; /* 中央配置 */
+  margin-right: auto;        /* 中央配置 */
 }
 
 .board {
