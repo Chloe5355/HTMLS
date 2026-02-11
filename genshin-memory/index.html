@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>原神風元素神経衰弱 完全版</title>
+<title>神経衰弱</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -29,7 +29,9 @@
     <option value="hard">強</option>
   </select>
   <br>
+
   <button onclick="startGame()">▶ ゲーム開始</button>
+  <button onclick="showRules()">📖 ルール</button>
 
   <div id="titleFrame">
     <span>装備中の称号: <span id="equippedTitle">なし</span></span>
@@ -65,6 +67,22 @@
   <p>獲得称号: <span id="winTitle">なし</span></p>
   <button onclick="startGame()">次のゲーム</button>
   <button onclick="stopGame()">タイトルに戻る</button>
+</div>
+
+<!-- ルールモーダル -->
+<div id="rulesModal" class="modal">
+  <div class="modalContent">
+    <h2>🎮 ゲームのルール</h2>
+    <p>
+      ・カードを2枚めくり同じ絵柄を揃えます。<br>
+      ・自分が揃えた枚数が多ければ勝ち、AIが多ければ負けです。<br>
+      ・揃わなかった場合、相手のターンになります。<br>
+      ・AIは揃った限り連続でめくります。<br>
+      ・盤面サイズは4x4〜16x16まで選択可能です。<br>
+      ・ゲーム終了後に獲得した称号や実績が確認できます。
+    </p>
+    <button onclick="closeRules()">閉じる</button>
+  </div>
 </div>
 
 <script src="js/game.js"></script>
