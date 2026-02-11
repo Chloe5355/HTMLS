@@ -15,7 +15,7 @@ let streak=0, maxStreak=0;
 let elementWins={}, ownedTitles={}, equippedTitle='';
 let developerMode=false;
 
-// 称号と実績サンプル
+// 称号・実績
 const ACHIEVEMENTS = [
   { name:'10連勝', condition:10, type:'win', title:'大共鳴者', special:false },
   { name:'全勝', condition:100, type:'win', title:'開発者称号', special:true }
@@ -23,22 +23,17 @@ const ACHIEVEMENTS = [
 
 // ------------------------
 // テーマ変更
-// ------------------------
 function changeElement(){
   if(gameRunning) return;
   const elId=document.getElementById('element').value;
   const element=ELEMENTS.find(e=>e.id===elId);
   if(element){
     document.documentElement.style.setProperty('--main', element.color);
-    document.querySelectorAll('.card.open').forEach(c=>{
-      c.style.boxShadow=`0 0 20px ${element.color}`;
-    });
   }
 }
 
 // ------------------------
 // ゲーム開始
-// ------------------------
 function startGame(){
   document.getElementById('titleScreen').classList.remove('active');
   document.getElementById('gameScreen').classList.add('active');
@@ -51,17 +46,16 @@ function startGame(){
 
 // ------------------------
 // ゲーム終了
-// ------------------------
 function stopGame(){
   document.getElementById('titleScreen').classList.add('active');
   document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('winScreen').classList.remove('active');
   gameRunning=false; aiTurn=false; board.innerHTML='';
   document.getElementById('element').disabled=false;
 }
 
 // ------------------------
-// カード生成
-// ------------------------
+// カード生成（フリップ対応）
 function shuffleCards(){
   board.innerHTML=''; opened=[]; aiMemory={};
   let cards=[...ELEMENTS,...ELEMENTS].sort(()=>Math.random()-0.5);
@@ -72,6 +66,12 @@ function shuffleCards(){
     div.dataset.icon=el.icon;
     div.dataset.color=el.color;
     div.dataset.index=i;
+    div.innerHTML=`
+      <div class="card-inner">
+        <div class="card-front"></div>
+        <div class="card-back">${el.icon}</div>
+      </div>
+    `;
     div.onclick=()=>playerMove(div);
     board.appendChild(div);
   });
@@ -79,7 +79,6 @@ function shuffleCards(){
 
 // ------------------------
 // プレイヤー操作
-// ------------------------
 function playerMove(card){
   if(!gameRunning || aiTurn || card.classList.contains('open')) return;
   openCard(card);
@@ -90,41 +89,44 @@ function playerMove(card){
 }
 function openCard(card){
   card.classList.add('open');
-  card.textContent=card.dataset.icon;
-  card.style.boxShadow=`0 0 20px ${card.dataset.color}`;
   opened.push(card);
-  if(aiDifficulty!=='easy'){ aiMemory[card.dataset.index]=card.dataset.element; }
+  if(aiDifficulty!=='easy'){
+    aiMemory[card.dataset.index]=card.dataset.element;
+  }
+}
+function closeCard(card){
+  card.classList.remove('open');
+  opened = opened.filter(c => c!==card);
 }
 
 // ------------------------
 // マッチ判定
-// ------------------------
 function checkMatch(){
   const [a,b]=opened;
   if(a.dataset.element!==b.dataset.element){
     setTimeout(()=>{
-      a.classList.remove('open'); a.textContent=''; a.style.boxShadow='';
-      b.classList.remove('open'); b.textContent=''; b.style.boxShadow='';
-      opened=[];
-      setTimeout(aiMove, 500); // AIターンゆっくり開始
+      closeCard(a); closeCard(b);
+      setTimeout(aiMove,500);
     },500);
   } else {
     streak++; maxStreak=Math.max(streak,maxStreak);
-    opened=[]; checkAchievements();
-    setTimeout(aiMove, 500); // AIターンゆっくり開始
+    opened=[];
+    checkAchievements();
+    const allOpen = Array.from(document.querySelectorAll('.card')).every(c=>c.classList.contains('open'));
+    if(allOpen) showWinScreen();
+    else setTimeout(aiMove,500);
   }
   renderStatus();
 }
 
 // ------------------------
-// AIターン（1枚ずつゆっくり開く）
+// AIターン
 function aiMove(){
   if(!gameRunning){ aiTurn=false; return; }
   let cards=Array.from(document.querySelectorAll('.card')).filter(c=>!c.classList.contains('open'));
   if(cards.length<2){ aiTurn=false; return; }
 
   aiTurn=true;
-
   let pick1,pick2;
   if(aiDifficulty==='easy'){
     pick1=cards[Math.floor(Math.random()*cards.length)];
@@ -150,13 +152,12 @@ function aiMove(){
     setTimeout(()=>{
       checkMatch();
       aiTurn=false;
-    }, 800);
-  }, 500);
+    },800);
+  },500);
 }
 
 // ------------------------
 // ステータス描画
-// ------------------------
 function renderStatus(){
   document.getElementById('streak').textContent=streak;
   let winRate=maxStreak?Math.round(streak/maxStreak*100):0;
@@ -165,7 +166,6 @@ function renderStatus(){
 
 // ------------------------
 // 称号・実績
-// ------------------------
 function checkAchievements(){
   ACHIEVEMENTS.forEach(a=>{
     if(!ownedTitles[a.title] && streak>=a.condition){
@@ -192,6 +192,33 @@ function equipTitle(title){
   frame.className='';
   if(title==='開発者称号') frame.classList.add('developer');
   else if(title.includes('大共鳴者')) frame.classList.add('gold');
+}
+
+// ------------------------
+// 勝利画面
+function showWinScreen(){
+  gameRunning=false; aiTurn=false;
+  document.getElementById('gameScreen').classList.remove('active');
+  const winScreen=document.getElementById('winScreen');
+  winScreen.classList.add('active');
+  document.getElementById('winStreak').textContent=streak;
+  const titles=Object.keys(ownedTitles);
+  document.getElementById('winTitle').textContent = titles.length>0 ? titles[titles.length-1] : 'なし';
+
+  // 背景色を元素テーマに応じて変更
+  const elId=document.getElementById('element').value;
+  const element=ELEMENTS.find(e=>e.id===elId);
+  if(element){
+    winScreen.style.background = `radial-gradient(circle, ${element.color} 0%, transparent 70%)`;
+  }
+}
+
+function nextGame(){
+  document.getElementById('winScreen').classList.remove('active');
+  document.getElementById('gameScreen').classList.add('active');
+  gameRunning=true; aiTurn=false;
+  shuffleCards();
+  renderStatus();
 }
 
 // ------------------------
