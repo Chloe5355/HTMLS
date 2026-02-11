@@ -83,7 +83,10 @@ function shuffleCards(){
 function playerMove(card){
   if(!gameRunning || aiTurn || card.classList.contains('open')) return;
   openCard(card);
-  if(opened.length===2){ aiTurn=true; setTimeout(checkMatch,800); }
+  if(opened.length===2){ 
+    aiTurn=true; 
+    setTimeout(checkMatch,800); 
+  }
 }
 function openCard(card){
   card.classList.add('open');
@@ -102,23 +105,26 @@ function checkMatch(){
     setTimeout(()=>{
       a.classList.remove('open'); a.textContent=''; a.style.boxShadow='';
       b.classList.remove('open'); b.textContent=''; b.style.boxShadow='';
-      opened=[]; aiMove();
+      opened=[];
+      setTimeout(aiMove, 500); // AIターンゆっくり開始
     },500);
   } else {
     streak++; maxStreak=Math.max(streak,maxStreak);
-    opened=[]; checkAchievements(); aiMove();
+    opened=[]; checkAchievements();
+    setTimeout(aiMove, 500); // AIターンゆっくり開始
   }
   renderStatus();
 }
 
 // ------------------------
-// AI
-// ------------------------
+// AIターン（1枚ずつゆっくり開く）
 function aiMove(){
   if(!gameRunning){ aiTurn=false; return; }
-  aiTurn=true;
   let cards=Array.from(document.querySelectorAll('.card')).filter(c=>!c.classList.contains('open'));
   if(cards.length<2){ aiTurn=false; return; }
+
+  aiTurn=true;
+
   let pick1,pick2;
   if(aiDifficulty==='easy'){
     pick1=cards[Math.floor(Math.random()*cards.length)];
@@ -132,11 +138,20 @@ function aiMove(){
         if(pick1 && pick2){ found=true; break; }
       }
     } if(found) break; }
-    if(!found){ pick1=cards[Math.floor(Math.random()*cards.length)];
-      pick2=cards[Math.floor(Math.random()*cards.length)]; }
+    if(!found){
+      pick1=cards[Math.floor(Math.random()*cards.length)];
+      pick2=cards[Math.floor(Math.random()*cards.length)];
+    }
   }
-  openCard(pick1); openCard(pick2);
-  if(opened.length===2){ setTimeout(checkMatch,800); } else { aiTurn=false; }
+
+  openCard(pick1);
+  setTimeout(()=>{
+    openCard(pick2);
+    setTimeout(()=>{
+      checkMatch();
+      aiTurn=false;
+    }, 800);
+  }, 500);
 }
 
 // ------------------------
@@ -159,14 +174,12 @@ function checkAchievements(){
       li.textContent=a.title + (a.special?' 🔥':'');
       if(a.special) li.style.color='gold';
       document.getElementById('titleList').appendChild(li);
-      // 自動装備開発者称号
       if(a.title==='開発者称号'){ equipTitle('開発者称号'); developerMode=true; document.getElementById('devPanel').style.display='block'; }
     }
   });
 }
 
 function equipCurrentTitle(){
-  // 最新取得称号装備
   const titles=Object.keys(ownedTitles);
   if(titles.length>0) equipTitle(titles[titles.length-1]);
 }
@@ -183,7 +196,6 @@ function equipTitle(title){
 
 // ------------------------
 // 開発者モードUI色
-// ------------------------
 function applyUIColor(){
   if(!developerMode) return;
   const color=document.getElementById('uiColor').value;
