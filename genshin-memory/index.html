@@ -3,36 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>原神風元素神経衰弱</title>
+<title>原神風元素神経衰弱 レスポンシブ版</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- タイトル画面 -->
 <div id="titleScreen" class="screen active">
   <h1>原神風元素神経衰弱</h1>
-  <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/Columbina.png" alt="旗">
-
-  <label for="element">元素テーマ:</label>
-  <select id="element" onchange="changeElement()">
-    <option value="wind">🌪 風</option>
-    <option value="fire">🔥 炎</option>
-    <option value="water">💧 水</option>
-    <option value="ice">❄ 氷</option>
-    <option value="thunder">⚡ 雷</option>
-    <option value="rock">🪨 岩</option>
-    <option value="grass">🌿 草</option>
-  </select>
-  <br>
-
   <label for="boardSize">盤面サイズ:</label>
   <select id="boardSize">
     <option value="4">4x4</option>
     <option value="6">6x6</option>
     <option value="8">8x8</option>
+    <option value="16">16x16</option>
   </select>
   <br>
-
   <label for="aiDifficulty">AI難易度:</label>
   <select id="aiDifficulty">
     <option value="easy">弱</option>
@@ -41,31 +26,18 @@
   </select>
   <br>
   <button onclick="startGame()">▶ ゲーム開始</button>
-
-  <div id="devPanel">
-    <h3>🎨 UIカラー変更</h3>
-    <label>背景色: <input type="color" id="bgColor" value="#ffffff"/></label>
-    <label>カード色: <input type="color" id="cardColor" value="#ffffff"/></label>
-    <label>カード枠色: <input type="color" id="cardBorderColor" value="#333333"/></label>
-    <button onclick="applyUIColor()">適用</button>
-  </div>
 </div>
 
-<!-- ゲーム画面 -->
 <div id="gameScreen" class="screen">
-  <div>
-    <button onclick="stopGame()">⏹ ゲーム終了</button>
-  </div>
+  <button onclick="stopGame()">⏹ ゲーム終了</button>
   <div id="board" class="board"></div>
-
   <div id="status">
-    <p>自分のペア: <span id="playerScore">0</span></p>
-    <p>AIのペア: <span id="aiScore">0</span></p>
+    <p>自分: <span id="playerScore">0</span></p>
+    <p>AI: <span id="aiScore">0</span></p>
     <p>現在のターン: <span id="currentTurnDisplay">あなた</span></p>
   </div>
 </div>
 
-<!-- 結果画面 -->
 <div id="winScreen" class="screen">
   <h1>🏆 結果</h1>
   <p id="winResult"></p>
