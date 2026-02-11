@@ -11,13 +11,13 @@
 <!-- タイトル画面 -->
 <div id="titleScreen" class="screen active">
   <h1>原神風元素神経衰弱</h1>
-  <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/Columbina.png" alt="旗">
+  <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/img/Columbina.png" alt="旗">
 
   <label for="boardSize">盤面サイズ:</label>
   <select id="boardSize">
     <option value="4">4x4</option>
     <option value="6">6x6</option>
-    <option value="8">8x8</option>
+    <option value="8" selected>8x8</option>
     <option value="16">16x16</option>
   </select>
   <br>
@@ -30,6 +30,17 @@
   </select>
   <br>
   <button onclick="startGame()">▶ ゲーム開始</button>
+
+  <div id="titleFrame">
+    <span>装備中の称号: <span id="equippedTitle">なし</span></span>
+  </div>
+  <button onclick="equipCurrentTitle()">🎖 称号を装備</button>
+
+  <h3>📜 称号一覧</h3>
+  <ul id="titleList"></ul>
+
+  <h3>🏆 実績</h3>
+  <ul id="achievementList"></ul>
 </div>
 
 <!-- ゲーム画面 -->
@@ -44,17 +55,6 @@
     <p>AI: <span id="aiScore">0</span></p>
     <p>現在のターン: <span id="currentTurnDisplay">あなた</span></p>
   </div>
-
-  <div id="titleFrame">
-    <span>装備中の称号: <span id="equippedTitle">なし</span></span>
-  </div>
-  <button onclick="equipCurrentTitle()">🎖 称号を装備</button>
-
-  <h3>📜 称号一覧</h3>
-  <ul id="titleList"></ul>
-
-  <h3>🏆 実績</h3>
-  <ul id="achievementList"></ul>
 </div>
 
 <!-- 結果画面 -->
