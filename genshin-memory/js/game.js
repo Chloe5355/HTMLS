@@ -23,12 +23,9 @@ function startGame(){
 
   renderBoard();
   updateScores();
-  renderTitles();
-  renderAchievements();
-  showScreen('gameScreen');
+  showScreen('gameScreen'); // ゲーム画面では称号・実績は非表示
 }
 
-// --------------------------
 function renderBoard(){
   const board=document.getElementById('board'); board.innerHTML='';
   cards.forEach((v,i)=>{
@@ -41,18 +38,15 @@ function renderBoard(){
   });
 }
 
-// --------------------------
-function updateTurnDisplay(){ document.getElementById('currentTurnDisplay').textContent=currentTurn==='player'?'あなた':'AI';}
+function updateTurnDisplay(){ document.getElementById('currentTurnDisplay').textContent=currentTurn==='player'?'あなた':'AI'; }
 
-// --------------------------
 function playerFlip(card){
   if(currentTurn!=='player'||flippedCards.length>=2||card.classList.contains('matched')) return;
   card.textContent=card.dataset.value;
   flippedCards.push(card);
-  if(flippedCards.length===2) setTimeout(checkPair,200);
+  if(flippedCards.length===2) setTimeout(checkPair,400);
 }
 
-// --------------------------
 function checkPair(){
   const [c1,c2]=flippedCards; if(!c1||!c2) return;
   if(c1.dataset.value===c2.dataset.value){
@@ -60,35 +54,68 @@ function checkPair(){
     currentTurn==='player'?playerScore++:aiScore++;
     matchedPairs++; flippedCards=[]; updateScores();
     if(matchedPairs>=totalPairs) return endGame();
-    if(currentTurn==='ai') setTimeout(aiTurn,200);
+    if(currentTurn==='ai') setTimeout(aiTurn,500);
     return;
   }
-  setTimeout(()=>{c1.textContent='?';c2.textContent='?';flippedCards=[]; switchTurn();},200);
+  setTimeout(()=>{
+    c1.textContent='?';
+    c2.textContent='?';
+    flippedCards=[];
+    switchTurn();
+  },500);
+}
+
+function switchTurn(){ 
+  currentTurn=currentTurn==='player'?'ai':'player'; 
+  updateTurnDisplay();
+  if(currentTurn==='ai') setTimeout(aiTurn,500);
 }
 
 // --------------------------
-function switchTurn(){ currentTurn=currentTurn==='player'?'ai':'player'; updateTurnDisplay();
-if(currentTurn==='ai') setTimeout(aiTurn,200); }
-
-// --------------------------
+// AIターン（揃う限り連続めくり・遅め表示）
 function aiTurn(){
   if(currentTurn!=='ai') return;
-  const available=Array.from(document.querySelectorAll('.card:not(.matched)'));
+
+  const available = Array.from(document.querySelectorAll('.card:not(.matched)'));
   if(available.length<2) return endGame();
-  let [c1,c2]=pickRandomPair(available);
-  c1.textContent=c1.dataset.value; c2.textContent=c2.dataset.value;
-  flippedCards=[c1,c2];
-  setTimeout(checkPair,200);
+
+  let [c1, c2] = pickRandomPair(available);
+  c1.textContent = c1.dataset.value;
+  c2.textContent = c2.dataset.value;
+  flippedCards = [c1, c2];
+
+  setTimeout(() => {
+    const matched = c1.dataset.value === c2.dataset.value;
+    if(matched){
+      c1.classList.add('matched'); c2.classList.add('matched');
+      aiScore++; matchedPairs++; flippedCards=[]; updateScores();
+      if(matchedPairs>=totalPairs) return endGame();
+      setTimeout(aiTurn, 600); // 揃ったら連続めくり
+    } else {
+      setTimeout(()=>{
+        c1.textContent='?';
+        c2.textContent='?';
+        flippedCards=[];
+        switchTurn();
+      }, 700);
+    }
+  }, 600);
 }
 
-// --------------------------
 function pickRandomPair(available){
-  let c1,c2; while(c1===c2||!c1||!c2){c1=available[Math.floor(Math.random()*available.length)]; c2=available[Math.floor(Math.random()*available.length)];} return [c1,c2];}
+  let c1,c2;
+  while(c1===c2||!c1||!c2){
+    c1=available[Math.floor(Math.random()*available.length)];
+    c2=available[Math.floor(Math.random()*available.length)];
+  }
+  return [c1,c2];
+}
 
-// --------------------------
-function updateScores(){ document.getElementById('playerScore').textContent=playerScore; document.getElementById('aiScore').textContent=aiScore; }
+function updateScores(){ 
+  document.getElementById('playerScore').textContent=playerScore; 
+  document.getElementById('aiScore').textContent=aiScore; 
+}
 
-// --------------------------
 function endGame(){
   showScreen('winScreen');
   document.getElementById('finalPlayerScore').textContent=playerScore;
@@ -100,17 +127,21 @@ function endGame(){
   document.getElementById('winResult').textContent=result;
   document.getElementById('winTitle').textContent=currentEquippedTitle;
   achievements.push(result);
-  renderAchievements();
 }
 
-// --------------------------
-function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function stopGame(){ showScreen('titleScreen'); }
+function showScreen(id){ 
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); 
+  document.getElementById(id).classList.add('active'); 
+}
 
-// --------------------------
+function stopGame(){
+  renderTitles();
+  renderAchievements();
+  showScreen('titleScreen'); 
+}
+
 function shuffle(array){for(let i=array.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]];}}
 
-// --------------------------
 function renderTitles(){
   const list=document.getElementById('titleList'); list.innerHTML='';
   titles.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; list.appendChild(li); });
