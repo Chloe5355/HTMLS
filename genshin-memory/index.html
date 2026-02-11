@@ -32,7 +32,6 @@
   <button onclick="startGame()">▶ ゲーム開始</button>
   <button onclick="showRules()">📖 ルール</button>
 
-  <!-- 称号・実績（タイトル画面のみ表示） -->
   <div id="titlesAchievements">
     <h3>🏆 称号一覧</h3>
     <ul id="titleList">
@@ -64,6 +63,14 @@
   <div>
     <button onclick="stopGame()">⏹ ゲーム終了</button>
   </div>
+
+  <!-- ターン＆スコア表示 -->
+  <div id="status">
+    <p>現在のターン: <span id="currentTurn">あなた</span></p>
+    <p>あなた: <span id="playerScore">0</span> 枚</p>
+    <p>AI: <span id="aiScore">0</span> 枚</p>
+  </div>
+
   <div id="board" class="board"></div>
 </div>
 
