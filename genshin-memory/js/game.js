@@ -8,11 +8,7 @@ let gridSize = 8;
 let winCount = 0;
 
 // AI思考時間（ミリ秒）
-const aiDelay = {
-  easy: 1500,
-  medium: 1000,
-  hard: 700
-};
+const aiDelay = { easy: 1500, medium: 1000, hard: 700 };
 
 function startGame() {
   gridSize = parseInt(document.getElementById('boardSize').value);
@@ -64,6 +60,7 @@ function initBoard(){
   currentTurn = 'player';
 }
 
+// ---------------- PLAYER TURN ----------------
 function playerTurn(card){
   if(currentTurn !== 'player') return;
   if(selected.includes(card) || card.classList.contains('matched')) return;
@@ -72,51 +69,19 @@ function playerTurn(card){
   selected.push(card);
   rememberCard(card);
 
-  if(selected.length === 2) checkMatch('player');
+  if(selected.length === 2) {
+    setTimeout(()=>checkMatch('player'), 1000);
+  }
   updateScore();
 }
 
-function rememberCard(card){
-  if(!aiMemory[card.dataset.icon]) aiMemory[card.dataset.icon]=[];
-  if(!aiMemory[card.dataset.icon].includes(card)) aiMemory[card.dataset.icon].push(card);
-}
-
-function checkMatch(player){
-  const [c1,c2] = selected;
-  if(c1.dataset.icon === c2.dataset.icon){
-    c1.classList.add('matched');
-    c2.classList.add('matched');
-    pairsFound[player]++;
-    removeFromMemory(c1.dataset.icon,[c1,c2]);
-    selected=[];
-    updateScore();
-
-    if(isGameOver()) showWin();
-    else if(player==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
-  } else {
-    setTimeout(()=>{
-      c1.textContent='';
-      c2.textContent='';
-      selected=[];
-      currentTurn = (player==='player')?'ai':'player';
-      updateScore();
-      if(currentTurn==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
-    }, 1000);
-  }
-}
-
-function removeFromMemory(icon, cards){
-  if(aiMemory[icon]){
-    aiMemory[icon] = aiMemory[icon].filter(c=>!cards.includes(c));
-    if(aiMemory[icon].length===0) delete aiMemory[icon];
-  }
-}
-
+// ---------------- AI TURN ----------------
 function aiTurn(){
-  let available = board.filter(c=>!c.classList.contains('matched'));
+  if(currentTurn !== 'ai') return;
+  let available = board.filter(c=>!c.classList.contains('matched') && !selected.includes(c));
   if(available.length<2) return;
 
-  let [c1, c2] = pickAICards(available);
+  let [c1, c2] = pickSmartAICards(available);
 
   c1.textContent = c1.dataset.icon;
   c2.textContent = c2.dataset.icon;
@@ -128,38 +93,80 @@ function aiTurn(){
   setTimeout(()=>checkMatch('ai'), aiDelay[aiLevel]);
 }
 
-function pickAICards(available){
-  if(aiLevel==='easy'){
-    let idx1=Math.floor(Math.random()*available.length);
-    let idx2=Math.floor(Math.random()*available.length);
-    if(idx1===idx2) idx2=(idx2+1)%available.length;
-    return [available[idx1],available[idx2]];
-  } else if(aiLevel==='medium'){
+// ---------------- CHECK MATCH ----------------
+function checkMatch(player){
+  const [c1,c2] = selected;
+  if(c1.dataset.icon === c2.dataset.icon){
+    c1.classList.add('matched');
+    c2.classList.add('matched');
+    pairsFound[player]++;
+    removeFromMemory(c1.dataset.icon,[c1,c2]);
+    selected = [];
+    updateScore();
+
+    if(isGameOver()) showWin();
+    else {
+      // 揃った場合は同じターンで続ける
+      if(player==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
+    }
+
+  } else {
+    // 揃わなかった場合はターン交代
+    setTimeout(()=>{
+      c1.textContent='';
+      c2.textContent='';
+      selected = [];
+      currentTurn = (player==='player') ? 'ai' : 'player';
+      updateScore();
+      if(currentTurn==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
+    }, 1000);
+  }
+}
+
+// ---------------- AI MEMORY ----------------
+function rememberCard(card){
+  if(!aiMemory[card.dataset.icon]) aiMemory[card.dataset.icon]=[];
+  if(!aiMemory[card.dataset.icon].includes(card)) aiMemory[card.dataset.icon].push(card);
+}
+
+function removeFromMemory(icon, cards){
+  if(aiMemory[icon]){
+    aiMemory[icon] = aiMemory[icon].filter(c=>!cards.includes(c));
+    if(aiMemory[icon].length===0) delete aiMemory[icon];
+  }
+}
+
+// ---------------- SMART AI CARD PICK ----------------
+function pickSmartAICards(available){
+  // hard: 完全優先で揃えられるペア
+  if(aiLevel==='hard'){
     for(let icon in aiMemory){
-      if(aiMemory[icon].length>=1){
+      if(aiMemory[icon].length>=2){
+        let knownCards = aiMemory[icon].filter(c=>available.includes(c));
+        if(knownCards.length>=2) return [knownCards[0], knownCards[1]];
+      }
+    }
+  }
+
+  // medium: 覚えたカードから1枚推測
+  if(aiLevel==='medium' || aiLevel==='hard'){
+    for(let icon in aiMemory){
+      if(aiMemory[icon].length===1){
         let known = aiMemory[icon][0];
         let random = available.find(c=>c!==known) || available[0];
         return [known, random];
       }
     }
-    let idx1=Math.floor(Math.random()*available.length);
-    let idx2=Math.floor(Math.random()*available.length);
-    if(idx1===idx2) idx2=(idx2+1)%available.length;
-    return [available[idx1], available[idx2]];
-  } else { // hard
-    for(let icon in aiMemory){
-      if(aiMemory[icon].length>=2){
-        return [aiMemory[icon][0], aiMemory[icon][1]];
-      }
-    }
-    // fallback
-    let idx1=Math.floor(Math.random()*available.length);
-    let idx2=Math.floor(Math.random()*available.length);
-    if(idx1===idx2) idx2=(idx2+1)%available.length;
-    return [available[idx1], available[idx2]];
   }
+
+  // easy: 完全ランダム
+  let idx1=Math.floor(Math.random()*available.length);
+  let idx2=Math.floor(Math.random()*available.length);
+  if(idx1===idx2) idx2=(idx2+1)%available.length;
+  return [available[idx1], available[idx2]];
 }
 
+// ---------------- GAME OVER ----------------
 function isGameOver(){
   return board.every(c=>c.classList.contains('matched'));
 }
@@ -186,9 +193,11 @@ function nextGame(){
   startGame();
 }
 
+// ---------------- RULES ----------------
 function showRules(){ document.getElementById('rulesModal').style.display='flex'; }
 function closeRules(){ document.getElementById('rulesModal').style.display='none'; }
 
+// ---------------- SCORE UPDATE ----------------
 function updateScore(){
   document.getElementById('currentTurn').textContent = (currentTurn==='player')?'あなた':'AI';
   document.getElementById('playerScore').textContent = pairsFound.player;
