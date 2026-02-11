@@ -1,15 +1,16 @@
 // ----------------------------
 // 初期設定
 // ----------------------------
-const totalPairs = 8; 
+const totalPairs = 8;
 let playerScore = 0;
 let aiScore = 0;
 let matchedPairs = 0;
 let flippedCards = [];
 let cards = [];
-let aiMemory = {}; // AIが覚えているカード
+let aiMemory = {};
+let currentTurn = 'player'; // 'player' または 'ai'
 
-// カード絵文字（武器・元素・キャラクターイメージ）
+// カード絵文字
 const cardEmojis = ['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡'];
 
 // ----------------------------
@@ -21,6 +22,8 @@ function startGame() {
   matchedPairs = 0;
   flippedCards = [];
   aiMemory = {};
+  currentTurn = 'player';
+  updateTurnDisplay();
 
   cards = [];
   cardEmojis.forEach(emoji => {
@@ -55,9 +58,17 @@ function renderBoard() {
 }
 
 // ----------------------------
+// ターン表示更新
+// ----------------------------
+function updateTurnDisplay() {
+  document.getElementById('currentTurnDisplay').textContent = currentTurn === 'player' ? 'あなた' : 'AI';
+}
+
+// ----------------------------
 // プレイヤー操作
 // ----------------------------
 function playerFlip(card) {
+  if (currentTurn !== 'player') return;
   if (flippedCards.length >= 2 || card.classList.contains('matched')) return;
 
   card.textContent = card.dataset.value;
@@ -66,30 +77,54 @@ function playerFlip(card) {
   if (flippedCards.length === 2) setTimeout(checkPair, 500);
 }
 
+// ----------------------------
+// ペア判定
+// ----------------------------
 function checkPair() {
   const [c1, c2] = flippedCards;
 
   if (c1.dataset.value === c2.dataset.value) {
     c1.classList.add('matched');
     c2.classList.add('matched');
-    playerScore++;
+    if (currentTurn === 'player') {
+      playerScore++;
+      document.getElementById('playerScore').textContent = playerScore;
+    } else {
+      aiScore++;
+      document.getElementById('aiScore').textContent = aiScore;
+    }
     matchedPairs++;
-    document.getElementById('playerScore').textContent = playerScore;
+    flippedCards = [];
+
+    if (matchedPairs >= totalPairs) return endGame();
+    // 揃った場合は同じターンで続行
+    if (currentTurn === 'ai') setTimeout(aiTurn, 500);
   } else {
-    c1.textContent = '?';
-    c2.textContent = '?';
+    // 揃わなかった場合はカードを裏返してターン交代
+    setTimeout(() => {
+      c1.textContent = '?';
+      c2.textContent = '?';
+      flippedCards = [];
+      switchTurn();
+    }, 500);
   }
+}
 
-  flippedCards = [];
-
-  if (matchedPairs < totalPairs) setTimeout(aiTurn, 500);
-  else endGame();
+// ----------------------------
+// ターン切り替え
+// ----------------------------
+function switchTurn() {
+  currentTurn = currentTurn === 'player' ? 'ai' : 'player';
+  updateTurnDisplay();
+  if (currentTurn === 'ai') setTimeout(aiTurn, 500);
 }
 
 // ----------------------------
 // AIターン（難易度別）
 // ----------------------------
 function aiTurn() {
+  if (currentTurn !== 'ai') return;
+
   const difficulty = document.getElementById('aiDifficulty').value;
   const available = Array.from(document.querySelectorAll('.card:not(.matched)'));
   if (available.length < 2) return;
@@ -99,12 +134,6 @@ function aiTurn() {
   if (difficulty === 'easy') [c1, c2] = pickRandomPair(available);
   else if (difficulty === 'medium') [c1, c2] = mediumAI(available);
   else [c1, c2] = hardAI(available);
-
-  flipAICards(c1, c2);
-}
-
-function flipAICards(c1, c2) {
-  if (!c1 || !c2) return;
 
   c1.textContent = c1.dataset.value;
   c2.textContent = c2.dataset.value;
@@ -116,19 +145,8 @@ function flipAICards(c1, c2) {
   aiMemory[c2.dataset.value] = aiMemory[c2.dataset.value] || [];
   if (!aiMemory[c2.dataset.value].includes(c2.dataset.index)) aiMemory[c2.dataset.value].push(c2.dataset.index);
 
-  if (c1.dataset.value === c2.dataset.value) {
-    c1.classList.add('matched');
-    c2.classList.add('matched');
-    aiScore++;
-    matchedPairs++;
-    document.getElementById('aiScore').textContent = aiScore;
-  }
-
-  setTimeout(() => {
-    if (!c1.classList.contains('matched')) c1.textContent = '?';
-    if (!c2.classList.contains('matched')) c2.textContent = '?';
-    if (matchedPairs >= totalPairs) endGame();
-  }, 500);
+  flippedCards = [c1, c2];
+  setTimeout(checkPair, 500);
 }
 
 // ----------------------------
@@ -152,7 +170,7 @@ function mediumAI(available) {
 }
 
 function hardAI(available) {
-  return mediumAI(available); // mediumより記憶を完全活用するように拡張可能
+  return mediumAI(available); // 完全最適化可能
 }
 
 // ----------------------------
@@ -160,7 +178,6 @@ function hardAI(available) {
 // ----------------------------
 function endGame() {
   showScreen('winScreen');
-
   document.getElementById('finalPlayerScore').textContent = playerScore;
   document.getElementById('finalAIScore').textContent = aiScore;
 
@@ -184,7 +201,7 @@ function stopGame() {
 }
 
 // ----------------------------
-// ヘルパー
+// ヘルパー関数
 // ----------------------------
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
