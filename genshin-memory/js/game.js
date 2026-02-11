@@ -17,7 +17,6 @@ const cardEmojis = ['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡'];
 // ゲーム開始
 // ----------------------------
 function startGame() {
-  // 初期化
   playerScore = 0;
   aiScore = 0;
   matchedPairs = 0;
@@ -88,6 +87,7 @@ function checkPair() {
   if (c1.dataset.value === c2.dataset.value) {
     c1.classList.add('matched');
     c2.classList.add('matched');
+
     if (currentTurn === 'player') {
       playerScore++;
       document.getElementById('playerScore').textContent = playerScore;
@@ -95,21 +95,25 @@ function checkPair() {
       aiScore++;
       document.getElementById('aiScore').textContent = aiScore;
     }
+
     matchedPairs++;
     flippedCards = [];
 
     if (matchedPairs >= totalPairs) return endGame();
-    // 揃った場合は同じターンで続行
+
+    // AIの場合は次のターンも自動で続行
     if (currentTurn === 'ai') setTimeout(aiTurn, 500);
-  } else {
-    // 揃わなかった場合はカードを裏返してターン交代
-    setTimeout(() => {
-      c1.textContent = '?';
-      c2.textContent = '?';
-      flippedCards = [];
-      switchTurn();
-    }, 500);
+
+    return; // 揃った場合は同じターンで続行
   }
+
+  // 揃わなかった場合はターン交代
+  setTimeout(() => {
+    c1.textContent = '?';
+    c2.textContent = '?';
+    flippedCards = [];
+    switchTurn();
+  }, 500);
 }
 
 // ----------------------------
@@ -148,7 +152,7 @@ function aiTurn() {
   if (!aiMemory[c2.dataset.value].includes(c2.dataset.index)) aiMemory[c2.dataset.value].push(c2.dataset.index);
 
   flippedCards = [c1, c2];
-  setTimeout(checkPair, 500);
+  setTimeout(checkPair, 500); // AIもcheckPairで判定
 }
 
 // ----------------------------
