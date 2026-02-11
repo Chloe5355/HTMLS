@@ -164,9 +164,9 @@ function showWin(){
 
   if(pairsFound.player > pairsFound.ai){
     document.getElementById('winner').textContent = 'あなた';
-    winCount++; // 勝利回数カウント
+    winCount++;
     document.getElementById('winCount').textContent = winCount;
-  } else if(pairsFound.player < pairsFound.ai) {
+  } else if(pairsFound.player < pairsFound.ai){
     document.getElementById('winner').textContent = 'AI';
   } else {
     document.getElementById('winner').textContent = '引き分け';
