@@ -87,6 +87,16 @@ li { list-style:none; padding:4px 0; border-left:3px solid var(--main); margin-b
 
 #devPanel { position:absolute; top:10px; right:10px; background: rgba(0,0,0,0.5); padding:10px; border-radius:8px; z-index:10; color:#fff; font-size:0.9rem; }
 
+.flag {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 10px auto;
+  display: block;
+  border: 2px solid var(--main);
+}
+
 @media screen and (max-width: 480px) {
   :root { --card-width:50px; --card-height:75px; }
   #titleFrame { font-size:0.9rem; }
