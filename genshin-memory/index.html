@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>原神風元素神経衰弱</title>
-<!-- 修正：CSSパスをcssフォルダに対応 -->
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,12 +11,10 @@
 <!-- タイトル画面 -->
 <div id="titleScreen" class="screen active">
   <h1>原神風元素神経衰弱</h1>
-
-  <!-- 円形画像 -->
   <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/Columbina.png" alt="旗">
 
   <label for="element">元素テーマ:</label>
-  <select id="element" onchange="changeElement()">
+  <select id="element">
     <option value="wind">🌪 風</option>
     <option value="fire">🔥 炎</option>
     <option value="water">💧 水</option>
@@ -45,36 +42,20 @@
   <div id="board" class="board"></div>
 
   <div id="status">
-    <p>連勝: <span id="streak">0</span></p>
-    <p>勝率: <span id="winRate">0%</span></p>
-  </div>
-
-  <div id="titleFrame"><span id="equippedTitle">称号なし</span></div>
-  <button onclick="equipCurrentTitle()">🎖 称号を装備</button>
-
-  <h3>📜 称号一覧</h3>
-  <ul id="titleList"></ul>
-
-  <h3>🏆 実績</h3>
-  <ul id="achievementList"></ul>
-
-  <div id="devPanel" style="display:none">
-    <h3>🎨 Developer Mode</h3>
-    <input type="color" id="uiColor"/>
-    <button onclick="applyUIColor()">適用</button>
+    <p>自分のペア: <span id="playerScore">0</span></p>
+    <p>AIのペア: <span id="aiScore">0</span></p>
   </div>
 </div>
 
 <!-- 勝利画面 -->
 <div id="winScreen" class="screen">
-  <h1>🏆 勝利！</h1>
-  <p>連勝: <span id="winStreak">0</span></p>
-  <p>獲得称号: <span id="winTitle">なし</span></p>
-  <button onclick="nextGame()">次のゲーム</button>
+  <h1>🏆 結果</h1>
+  <p id="winResult"></p>
+  <p>自分: <span id="finalPlayerScore">0</span> - AI: <span id="finalAIScore">0</span></p>
+  <button onclick="startGame()">次のゲーム</button>
   <button onclick="stopGame()">タイトルに戻る</button>
 </div>
 
-<!-- 修正：JSパスをjsフォルダに対応 -->
 <script src="js/game.js"></script>
 </body>
 </html>
