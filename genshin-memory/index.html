@@ -8,6 +8,7 @@
 </head>
 <body>
 
+<!-- タイトル画面 -->
 <div id="titleScreen" class="screen active">
   <h1>原神風元素神経衰弱</h1>
   <label for="element">元素テーマ:</label>
@@ -31,6 +32,7 @@
   <button onclick="startGame()">▶ ゲーム開始</button>
 </div>
 
+<!-- ゲーム画面 -->
 <div id="gameScreen" class="screen">
   <div>
     <button onclick="stopGame()">⏹ ゲーム終了</button>
@@ -56,6 +58,15 @@
     <input type="color" id="uiColor"/>
     <button onclick="applyUIColor()">適用</button>
   </div>
+</div>
+
+<!-- 勝利画面 -->
+<div id="winScreen" class="screen">
+  <h1>🏆 勝利！</h1>
+  <p>連勝: <span id="winStreak">0</span></p>
+  <p>獲得称号: <span id="winTitle">なし</span></p>
+  <button onclick="nextGame()">次のゲーム</button>
+  <button onclick="stopGame()">タイトルに戻る</button>
 </div>
 
 <script src="js/game.js"></script>
