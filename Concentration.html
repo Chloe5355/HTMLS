@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原神風元素神経衰弱</title>
+<style>
+:root {
+  --main: #3ee6c4;
+  --bg1: #1b2b4a;
+  --bg2: #0b1324;
+  --card: #243b6b;
+  --card-open: #fff6d0;
+}
+
+body {
+  font-family: sans-serif;
+  background: radial-gradient(circle at top, var(--bg1), var(--bg2));
+  color: var(--main);
+  text-align: center;
+  margin:0; padding:10px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 70px);
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.card {
+  width: 70px;
+  height: 100px;
+  background: var(--card);
+  border: 2px solid var(--main);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.card.open {
+  font-size: 30px;
+  background: var(--card-open);
+}
+
+#titleFrame {
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--main);
+  margin: 10px auto;
+  display: inline-block;
+}
+
+#titleFrame.gold {
+  border: 2px solid gold;
+  box-shadow: 0 0 15px gold;
+  background: linear-gradient(45deg, rgba(255,215,0,0.15), rgba(255,255,255,0.05));
+}
+
+#titleFrame.developer {
+  border: 3px solid gold;
+  background: linear-gradient(135deg, rgba(255,215,0,0.35), rgba(255,255,255,0.1));
+  box-shadow: 0 0 20px gold, 0 0 40px rgba(255,215,0,0.6);
+  animation: devGlow 3s infinite alternate;
+}
+
+@keyframes devGlow {
+  from { filter: brightness(1); }
+  to   { filter: brightness(1.3); }
+}
+
+#achievementList li, #titleList li {
+  list-style: none;
+  padding: 6px;
+  border-left: 3px solid var(--main);
+  margin-bottom: 4px;
+}
+</style>
+</head>
+<body>
+  <h1>原神風元素神経衰弱</h1>
+
+  <!-- テーマ選択 -->
+  <label for="element">元素テーマ:</label>
+  <select id="element" onchange="changeElement()">
+    <option value="wind">🌪 風</option>
+    <option value="fire">🔥 炎</option>
+    <option value="water">💧 水</option>
+    <option value="ice">❄ 氷</option>
+    <option value="thunder">⚡ 雷</option>
+    <option value="rock">🪨 岩</option>
+    <option value="grass">🌿 草</option>
+  </select>
+
+  <!-- ゲームボード -->
+  <div id="board" class="board"></div>
+
+  <!-- ステータス -->
+  <div id="status">
+    <p>連勝: <span id="streak">0</span></p>
+    <p>勝率: <span id="winRate">0%</span></p>
+  </div>
+
+  <!-- 称号装備 -->
+  <div id="titleFrame">
+    <span id="equippedTitle">なし</span>
+  </div>
+  <button onclick="equipCurrentTitle()">🎖 この称号を装備</button>
+
+  <!-- 称号図鑑 -->
+  <h3>📜 称号図鑑</h3>
+  <ul id="titleList"></ul>
+
+  <!-- 実績一覧 -->
+  <h3>🏆 実績</h3>
+  <ul id="achievementList"></ul>
+
+  <!-- 開発者モードパネル -->
+  <div id="devPanel" style="display:none">
+    <h3>🎨 Developer Mode</h3>
+    <input type="color" id="uiColor" />
+    <button onclick="applyUIColor()">適用</button>
+  </div>
+
+<script>
+// ------------------------
+// 元素定義
+// ------------------------
+const ELEMENTS = [
+  { id: 'wind',    name: '風', icon: '🌪', color: '#3ee6c4' },
+  { id: 'fire',    name: '炎', icon: '🔥', color: '#ff4b4b' },
+  { id: 'water',   name: '水', icon: '💧', color: '#3b82f6' },
+  { id: 'ice',     name: '氷', icon: '❄', color: '#7dd3fc' },
+  { id: 'thunder', name: '雷', icon: '⚡', color: '#a855f7' },
+  { id: 'rock',    name: '岩', icon: '🪨', color: '#facc15' },
+  { id: 'grass',   name: '草', icon: '🌿', color: '#22c55e' }
+];
+
+// ------------------------
+// ゲーム変数
+// ------------------------
+let board = document.getElementById('board');
+let opened = [];
+let elementWins = JSON.parse(localStorage.getItem('elementWins')) || {};
+let ownedTitles = JSON.parse(localStorage.getItem('titles')) || {};
+let equippedTitle = localStorage.getItem('equippedTitle') || '';
+let developerMode = localStorage.getItem('developerMode')==='true';
+let maxStreak=0;
+let streak=0;
+
+// ------------------------
+// カード生成
+// ------------------------
+function shuffleCards(){
+  board.innerHTML='';
+  let cards = [...ELEMENTS,...ELEMENTS].sort(()=>Math.random()-0.5);
+  cards.forEach((el,i)=>{
+    const div=document.createElement('div');
+    div.className='card';
+    div.dataset.element=el.id;
+    div.dataset.icon=el.icon;
+    div.dataset.color=el.color;
+    div.dataset.index=i;
+    div.onclick=()=>openCard(div);
+    board.appendChild(div);
+  });
+}
+
+function openCard(card){
+  if(card.classList.contains('open')) return;
+  card.classList.add('open');
+  card.textContent=card.dataset.icon;
+  card.style.boxShadow=`0 0 20px ${card.dataset.color}`;
+  opened.push(card);
+  if(opened.length===2) setTimeout(checkMatch,800);
+}
+
+function checkMatch(){
+  const [a,b]=opened;
+  if(a.dataset.element===b.dataset.element){
+    alert('ペア成功！');
+    const el=document.getElementById('element').value;
+    elementWins[el]=(elementWins[el]||0)+1;
+    localStorage.setItem('elementWins',JSON.stringify(elementWins));
+    streak++; if(streak>maxStreak) maxStreak=streak;
+    checkAchievements();
+    checkTitleUpgrade(el);
+  }else{
+    a.classList.remove('open'); a.textContent=''; a.style.boxShadow='';
+    b.classList.remove('open'); b.textContent=''; b.style.boxShadow='';
+    streak=0;
+  }
+  opened=[];
+  renderStatus();
+}
+
+function renderStatus(){
+  document.getElementById('streak').textContent=streak;
+  let totalWins=Object.values(elementWins).reduce((a,b)=>a+b,0);
+  let totalGames=maxStreak;
+  document.getElementById('winRate').textContent=totalGames?Math.round(totalWins/totalGames*100)+'%':'0%';
+}
+
+// ------------------------
+// 元素テーマ
+// ------------------------
+function changeElement(){
+  const el=document.getElementById('element').value;
+  document.body.dataset.element=el;
+  localStorage.setItem('element',el);
+  updateTitle();
+}
+const savedElement = localStorage.getItem('element')||'wind';
+document.body.dataset.element = savedElement;
+document.getElementById('element').value = savedElement;
+
+// ------------------------
+// 称号
+// ------------------------
+const TITLE_LEVELS = {};
+ELEMENTS.forEach((el)=>{
+  TITLE_LEVELS[el.id]=[
+    {win:1,name:el.icon+' '+el.name+'の共鳴者'},
+    {win:5,name:el.icon+' '+el.name+'の熟練者'},
+    {win:10,name:el.icon+' '+el.name+'の大共鳴者'}
+  ];
+});
+const DEVELOPER_TITLE='👨‍💻 開発者';
+
+function checkTitleUpgrade(el){
+  const wins=elementWins[el]||0;
+  TITLE_LEVELS[el].forEach(l=>{
+    if(wins===l.win){ ownedTitles[el]=l.name; localStorage.setItem('titles',JSON.stringify(ownedTitles)); alert('🏷 称号昇格！\n'+l.name);}
+  });
+  updateTitle();
+}
+
+function updateTitle(){
+  const el=document.getElementById('element').value;
+  document.getElementById('currentTitle')?.remove();
+  const p=document.createElement('p'); p.id='currentTitle';
+  p.textContent=ownedTitles[el]||'未獲得';
+  document.body.appendChild(p);
+}
+
+function equipCurrentTitle(){
+  const el=document.getElementById('element').value;
+  if(!ownedTitles[el]) return alert('まだ称号がありません');
+  equippedTitle=ownedTitles[el];
+  localStorage.setItem('equippedTitle',equippedTitle);
+  updateEquippedTitleUI();
+}
+
+function updateEquippedTitleUI(){
+  const frame=document.getElementById('titleFrame');
+  const span=document.getElementById('equippedTitle');
+  span.textContent=equippedTitle||'なし';
+  frame.classList.remove('gold','developer');
+  if(equippedTitle===DEVELOPER_TITLE){ frame.classList.add('developer'); enableDeveloperMode(); return; }
+  if(ownedTitles[equippedTitle]) frame.classList.add('gold');
+}
+updateEquippedTitleUI();
+
+// ------------------------
+// 実績
+// ------------------------
+let unlockedAchievements = JSON.parse(localStorage.getItem('achievements'))||{};
+const ACHIEVEMENTS=[
+  {id:'win10',name:'10連勝',condition:()=>maxStreak>=10,reward:{type:'title',value:'🏆 連勝の覇者'}},
+  {id:'grassMaster',name:'草元素10勝',condition:()=> (elementWins.grass||0)>=10,reward:{type:'elementTitle',element:'grass',level:2}},
+  {id:'allElements',name:'全元素制覇',condition:()=>Object.keys(TITLE_LEVELS).every(el=>elementWins[el]>=1),reward:{type:'specialTitle',value:'🌈 七元素の共鳴者'}}
+];
+
+function checkAchievements(){
+  ACHIEVEMENTS.forEach(a=>{
+    if(unlockedAchievements[a.id]) return;
+    if(a.condition()){
+      unlockedAchievements[a.id]=true;
+      localStorage.setItem('achievements',JSON.stringify(unlockedAchievements));
+      grantAchievementReward(a);
+    }
+  });
+  renderAchievementList();
+  renderTitleList();
+}
+
+function grantAchievementReward(a){
+  let msg=`🏆 実績解除！\n${a.name}\n\n`;
+  if(a.reward.type==='title'){ ownedTitles.special=a.reward.value; msg+=`称号獲得：${a.reward.value}`;}
+  if(a.reward.type==='elementTitle'){ const el=a.reward.element; const lvl=a.reward.level; ownedTitles[el]=TITLE_LEVELS[el][lvl].name; msg+=`称号進化：${ownedTitles[el]}`;}
+  if(a.reward.type==='specialTitle'){ ownedTitles.special[a.reward.value]=true; equippedTitle=a.reward.value; msg+=`特別称号：${a.reward.value}`;}
+  localStorage.setItem('titles',JSON.stringify(ownedTitles));
+  alert(msg);
+}
+
+function renderAchievementList(){
+  const ul=document.getElementById('achievementList'); if(!ul) return;
+  ul.innerHTML='';
+  ACHIEVEMENTS.forEach(a=>{
+    const li=document.createElement('li');
+    const done=unlockedAchievements[a.id];
+    li.textContent=done?`✔ ${a.name}`:`❓ ${a.name}`;
+    li.style.opacity=done?1:0.4;
+    ul.appendChild(li);
+  });
+}
+
+// ------------------------
+// 称号図鑑
+// ------------------------
+function renderTitleList(){
+  const ul=document.getElementById('titleList'); if(!ul) return;
+  ul.innerHTML='';
+  for(let el in TITLE_LEVELS){
+    TITLE_LEVELS[el].forEach(l=>{
+      const li=document.createElement('li');
+      const owned=Object.values(ownedTitles).includes(l.name);
+      li.textContent=owned?l.name:'❓ 未解放';
+      li.style.opacity=owned?1:0.4;
+      ul.appendChild(li);
+    });
+  }
+}
+renderTitleList();
+
+// ------------------------
+// 開発者モード
+// ------------------------
+function enableDeveloperMode(){
+  developerMode=true;
+  localStorage.setItem('developerMode','true');
+  document.getElementById('devPanel').style.display='block';
+}
+
+function applyUIColor(){
+  const color=document.getElementById('uiColor').value;
+  document.documentElement.style.setProperty('--main',color);
+  localStorage.setItem('devColor',color);
+}
+
+const savedColor=localStorage.getItem('devColor');
+if(savedColor && developerMode){
+  document.documentElement.style.setProperty('--main',savedColor);
+  document.getElementById('devPanel').style.display='block';
+}
+
+// ------------------------
+// 初期化
+// ------------------------
+shuffleCards();
+renderStatus();
+</script>
+</body>
+</html>
