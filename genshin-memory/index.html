@@ -4,26 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>真剣衰弱</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <!-- タイトル画面 -->
 <div id="titleScreen" class="screen active">
   <h1>真剣衰弱</h1>
-
-  <!-- タイトル下に画像 -->
   <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/img/Columbina.png" alt="旗">
 
-  <label for="boardSize">盤面サイズ:</label>
-  <select id="boardSize">
-    <option value="4">4x4</option>
-    <option value="6">6x6</option>
-    <option value="8" selected>8x8</option>
-    <option value="16">16x16</option>
+  <label for="element">元素テーマ:</label>
+  <select id="element" onchange="changeElement()">
+    <option value="wind">🌪 風</option>
+    <option value="fire">🔥 炎</option>
+    <option value="water">💧 水</option>
+    <option value="ice">❄ 氷</option>
+    <option value="thunder">⚡ 雷</option>
+    <option value="rock">🪨 岩</option>
+    <option value="grass">🌿 草</option>
   </select>
   <br>
-
   <label for="aiDifficulty">AI難易度:</label>
   <select id="aiDifficulty">
     <option value="easy">弱</option>
@@ -31,20 +31,17 @@
     <option value="hard">強</option>
   </select>
   <br>
-
   <button onclick="startGame()">▶ ゲーム開始</button>
   <button onclick="showRules()">📖 ルール</button>
+</div>
 
-  <div id="titleFrame">
-    <span>装備中の称号: <span id="equippedTitle">なし</span></span>
+<!-- ルールモーダル -->
+<div id="rulesModal" class="modal">
+  <div class="modalContent">
+    <h2>ルール</h2>
+    <p>同じ数のカードを揃える真剣衰弱ゲームです。AIと交互にめくり、揃えた枚数が多い方が勝ちです。</p>
+    <button onclick="closeRules()">閉じる</button>
   </div>
-  <button onclick="equipCurrentTitle()">🎖 称号を装備</button>
-
-  <h3>📜 称号一覧</h3>
-  <ul id="titleList"></ul>
-
-  <h3>🏆 実績</h3>
-  <ul id="achievementList"></ul>
 </div>
 
 <!-- ゲーム画面 -->
@@ -53,40 +50,17 @@
     <button onclick="stopGame()">⏹ ゲーム終了</button>
   </div>
   <div id="board" class="board"></div>
-
-  <div id="status">
-    <p>自分: <span id="playerScore">0</span></p>
-    <p>AI: <span id="aiScore">0</span></p>
-    <p>現在のターン: <span id="currentTurnDisplay">あなた</span></p>
-  </div>
 </div>
 
-<!-- 結果画面 -->
+<!-- 勝利画面 -->
 <div id="winScreen" class="screen">
   <h1>🏆 結果</h1>
-  <p id="winResult"></p>
-  <p>自分: <span id="finalPlayerScore">0</span> - AI: <span id="finalAIScore">0</span></p>
+  <p>連勝: <span id="winStreak">0</span></p>
   <p>獲得称号: <span id="winTitle">なし</span></p>
-  <button onclick="startGame()">次のゲーム</button>
+  <button onclick="nextGame()">次のゲーム</button>
   <button onclick="stopGame()">タイトルに戻る</button>
 </div>
 
-<!-- ルールモーダル -->
-<div id="rulesModal" class="modal">
-  <div class="modalContent">
-    <h2>🎮 ゲームのルール</h2>
-    <p>
-      ・カードを2枚めくり同じ絵柄を揃えます。<br>
-      ・自分が揃えた枚数が多ければ勝ち、AIが多ければ負けです。<br>
-      ・揃わなかった場合、相手のターンになります。<br>
-      ・AIは揃った限り連続でめくります。<br>
-      ・盤面サイズは4x4〜16x16まで選択可能です。<br>
-      ・ゲーム終了後に獲得した称号や実績が確認できます。
-    </p>
-    <button onclick="closeRules()">閉じる</button>
-  </div>
-</div>
-
-<script src="js/game.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
