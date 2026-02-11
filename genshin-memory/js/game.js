@@ -1,155 +1,194 @@
-const ELEMENTS = [
-  { id:'wind', icon:'🌪', color:'#3ee6c4', name:'風' },
-  { id:'fire', icon:'🔥', color:'#ff4b4b', name:'炎' },
-  { id:'water', icon:'💧', color:'#3b82f6', name:'水' },
-  { id:'ice', icon:'❄', color:'#7dd3fc', name:'氷' },
-  { id:'thunder', icon:'⚡', color:'#a855f7', name:'雷' },
-  { id:'rock', icon:'🪨', color:'#facc15', name:'岩' },
-  { id:'grass', icon:'🌿', color:'#22c55e', name:'草' }
-];
+// ----------------------------
+// 初期設定
+// ----------------------------
+const totalPairs = 8; 
+let playerScore = 0;
+let aiScore = 0;
+let matchedPairs = 0;
+let flippedCards = [];
+let cards = [];
+let aiMemory = {}; // AIが覚えているカード
 
-let board=document.getElementById('board');
-let opened=[], gameRunning=false, aiTurn=false;
-let aiDifficulty='medium', aiMemory={};
-let streak=0, maxStreak=0;
-let ownedTitles={}, equippedTitle='';
-let developerMode=false;
+// カード絵文字（武器・元素・キャラクターイメージ）
+const cardEmojis = ['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡'];
 
-const ACHIEVEMENTS = [
-  { name:'10連勝', condition:10, type:'win', title:'大共鳴者', special:false },
-  { name:'全勝', condition:100, type:'win', title:'開発者称号', special:true }
-];
+// ----------------------------
+// ゲーム開始
+// ----------------------------
+function startGame() {
+  playerScore = 0;
+  aiScore = 0;
+  matchedPairs = 0;
+  flippedCards = [];
+  aiMemory = {};
 
-function changeElement(){
-  if(gameRunning) return;
-  const elId=document.getElementById('element').value;
-  const element=ELEMENTS.find(e=>e.id===elId);
-  if(element) document.documentElement.style.setProperty('--main', element.color);
+  cards = [];
+  cardEmojis.forEach(emoji => {
+    cards.push(emoji);
+    cards.push(emoji);
+  });
+  shuffle(cards);
+
+  renderBoard();
+
+  document.getElementById('playerScore').textContent = 0;
+  document.getElementById('aiScore').textContent = 0;
+
+  showScreen('gameScreen');
 }
 
-function startGame(){
-  document.getElementById('titleScreen').classList.remove('active');
-  document.getElementById('gameScreen').classList.add('active');
-  gameRunning=true; aiTurn=false; streak=0; maxStreak=0;
-  aiDifficulty=document.getElementById('aiDifficulty').value;
-  changeElement(); shuffleCards(); renderStatus();
-  document.getElementById('element').disabled=true;
-}
-
-function stopGame(){
-  document.getElementById('titleScreen').classList.add('active');
-  document.getElementById('gameScreen').classList.remove('active');
-  document.getElementById('winScreen').classList.remove('active');
-  document.getElementById('winScreen').style.zIndex=0;
-  gameRunning=false; aiTurn=false; board.innerHTML='';
-  document.getElementById('element').disabled=false;
-}
-
-function shuffleCards(){
-  board.innerHTML=''; opened=[]; aiMemory={};
-  let cards=[...ELEMENTS,...ELEMENTS].sort(()=>Math.random()-0.5);
-  cards.forEach((el,i)=>{
-    const div=document.createElement('div');
-    div.className='card';
-    div.dataset.element=el.id;
-    div.dataset.icon=el.icon;
-    div.dataset.index=i;
-    div.innerHTML=`<div class="card-inner"><div class="card-front"></div><div class="card-back">${el.icon}</div></div>`;
-    div.onclick=()=>playerMove(div);
-    board.appendChild(div);
+// ----------------------------
+// ボード描画
+// ----------------------------
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  cards.forEach((value, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.value = value;
+    card.dataset.index = index;
+    card.textContent = '?';
+    card.onclick = () => playerFlip(card);
+    board.appendChild(card);
   });
 }
 
-function playerMove(card){
-  if(!gameRunning || aiTurn || card.classList.contains('open')) return;
-  openCard(card);
-  if(opened.length===2){ aiTurn=true; setTimeout(checkMatch,800); }
+// ----------------------------
+// プレイヤー操作
+// ----------------------------
+function playerFlip(card) {
+  if (flippedCards.length >= 2 || card.classList.contains('matched')) return;
+
+  card.textContent = card.dataset.value;
+  flippedCards.push(card);
+
+  if (flippedCards.length === 2) setTimeout(checkPair, 500);
 }
 
-function openCard(card){ card.classList.add('open'); opened.push(card); if(aiDifficulty!=='easy') aiMemory[card.dataset.index]=card.dataset.element; }
-function closeCard(card){ card.classList.remove('open'); opened=opened.filter(c=>c!==card); }
+function checkPair() {
+  const [c1, c2] = flippedCards;
 
-function checkMatch(){
-  const [a,b]=opened;
-  if(a.dataset.element!==b.dataset.element){
-    setTimeout(()=>{ closeCard(a); closeCard(b); setTimeout(aiMove,500); },500);
+  if (c1.dataset.value === c2.dataset.value) {
+    c1.classList.add('matched');
+    c2.classList.add('matched');
+    playerScore++;
+    matchedPairs++;
+    document.getElementById('playerScore').textContent = playerScore;
   } else {
-    streak++; maxStreak=Math.max(streak,maxStreak); opened=[];
-    checkAchievements();
-    const allOpen = Array.from(document.querySelectorAll('.card')).every(c=>c.classList.contains('open'));
-    if(allOpen) showWinScreen(); else setTimeout(aiMove,500);
+    c1.textContent = '?';
+    c2.textContent = '?';
   }
-  renderStatus();
+
+  flippedCards = [];
+
+  if (matchedPairs < totalPairs) setTimeout(aiTurn, 500);
+  else endGame();
 }
 
-function aiMove(){
-  if(!gameRunning){ aiTurn=false; return; }
-  let cards=Array.from(document.querySelectorAll('.card')).filter(c=>!c.classList.contains('open'));
-  if(cards.length<2){ aiTurn=false; return; }
+// ----------------------------
+// AIターン（難易度別）
+// ----------------------------
+function aiTurn() {
+  const difficulty = document.getElementById('aiDifficulty').value;
+  const available = Array.from(document.querySelectorAll('.card:not(.matched)'));
+  if (available.length < 2) return;
 
-  let pick1,pick2;
-  if(aiDifficulty==='easy'){
-    pick1=cards[Math.floor(Math.random()*cards.length)];
-    pick2=cards[Math.floor(Math.random()*cards.length)];
-  } else {
-    let found=false;
-    for(let i in aiMemory){ for(let j in aiMemory){
-      if(i!==j && aiMemory[i]===aiMemory[j]){
-        pick1=document.querySelector(`.card[data-index='${i}']`);
-        pick2=document.querySelector(`.card[data-index='${j}']`);
-        if(pick1 && pick2){ found=true; break; }
-      }
-    } if(found) break; }
-    if(!found){ pick1=cards[Math.floor(Math.random()*cards.length)]; pick2=cards[Math.floor(Math.random()*cards.length)]; }
+  let [c1, c2] = null;
+
+  if (difficulty === 'easy') [c1, c2] = pickRandomPair(available);
+  else if (difficulty === 'medium') [c1, c2] = mediumAI(available);
+  else [c1, c2] = hardAI(available);
+
+  flipAICards(c1, c2);
+}
+
+function flipAICards(c1, c2) {
+  if (!c1 || !c2) return;
+
+  c1.textContent = c1.dataset.value;
+  c2.textContent = c2.dataset.value;
+
+  // AI記憶に追加
+  aiMemory[c1.dataset.value] = aiMemory[c1.dataset.value] || [];
+  if (!aiMemory[c1.dataset.value].includes(c1.dataset.index)) aiMemory[c1.dataset.value].push(c1.dataset.index);
+
+  aiMemory[c2.dataset.value] = aiMemory[c2.dataset.value] || [];
+  if (!aiMemory[c2.dataset.value].includes(c2.dataset.index)) aiMemory[c2.dataset.value].push(c2.dataset.index);
+
+  if (c1.dataset.value === c2.dataset.value) {
+    c1.classList.add('matched');
+    c2.classList.add('matched');
+    aiScore++;
+    matchedPairs++;
+    document.getElementById('aiScore').textContent = aiScore;
   }
-  openCard(pick1);
-  setTimeout(()=>{ openCard(pick2); setTimeout(()=>{ checkMatch(); aiTurn=false; },800); },500);
+
+  setTimeout(() => {
+    if (!c1.classList.contains('matched')) c1.textContent = '?';
+    if (!c2.classList.contains('matched')) c2.textContent = '?';
+    if (matchedPairs >= totalPairs) endGame();
+  }, 500);
 }
 
-function renderStatus(){
-  document.getElementById('streak').textContent=streak;
-  let winRate=maxStreak?Math.round(streak/maxStreak*100):0;
-  document.getElementById('winRate').textContent=winRate+'%';
+// ----------------------------
+// AIロジック
+// ----------------------------
+function pickRandomPair(available) {
+  let c1, c2;
+  while (c1 === c2 || !c1 || !c2) {
+    c1 = available[Math.floor(Math.random() * available.length)];
+    c2 = available[Math.floor(Math.random() * available.length)];
+  }
+  return [c1, c2];
 }
 
-function checkAchievements(){
-  ACHIEVEMENTS.forEach(a=>{
-    if(!ownedTitles[a.title] && streak>=a.condition){
-      ownedTitles[a.title]=true;
-      const li=document.createElement('li');
-      li.textContent=a.title + (a.special?' 🔥':'');
-      if(a.special) li.style.color='gold';
-      document.getElementById('titleList').appendChild(li);
-      if(a.title==='開発者称号'){ equipTitle('開発者称号'); developerMode=true; document.getElementById('devPanel').style.display='block'; }
-    }
-  });
+function mediumAI(available) {
+  for (let val in aiMemory) {
+    const indices = aiMemory[val].filter(i => available.find(c => c.dataset.index == i));
+    if (indices.length >= 2) return [available.find(c => c.dataset.index == indices[0]), available.find(c => c.dataset.index == indices[1])];
+  }
+  return pickRandomPair(available);
 }
 
-function equipCurrentTitle(){ const titles=Object.keys(ownedTitles); if(titles.length>0) equipTitle(titles[titles.length-1]); }
-function equipTitle(title){ equippedTitle=title; const frame=document.getElementById('titleFrame'); const span=document.getElementById('equippedTitle'); span.textContent=title; frame.className=''; if(title==='開発者称号') frame.classList.add('developer'); else if(title.includes('大共鳴者')) frame.classList.add('gold'); }
-
-function showWinScreen(){
-  gameRunning=false; aiTurn=false;
-  document.getElementById('gameScreen').classList.remove('active');
-  const winScreen=document.getElementById('winScreen');
-  winScreen.classList.add('active'); winScreen.style.zIndex=100;
-  document.getElementById('winStreak').textContent=streak;
-  const titles=Object.keys(ownedTitles);
-  document.getElementById('winTitle').textContent = titles.length>0 ? titles[titles.length-1] : 'なし';
-  const elId=document.getElementById('element').value;
-  const element=ELEMENTS.find(e=>e.id===elId);
-  if(element) winScreen.style.background = `radial-gradient(circle, ${element.color} 0%, transparent 70%)`;
+function hardAI(available) {
+  return mediumAI(available); // mediumより記憶を完全活用するように拡張可能
 }
 
-function nextGame(){
-  const winScreen=document.getElementById('winScreen');
-  winScreen.classList.remove('active'); winScreen.style.zIndex=0;
-  document.getElementById('gameScreen').classList.add('active');
-  gameRunning=true; aiTurn=false; shuffleCards(); renderStatus();
+// ----------------------------
+// 勝敗判定
+// ----------------------------
+function endGame() {
+  showScreen('winScreen');
+
+  document.getElementById('finalPlayerScore').textContent = playerScore;
+  document.getElementById('finalAIScore').textContent = aiScore;
+
+  let result;
+  if (playerScore > aiScore) result = '🎉 あなたの勝ち！';
+  else if (playerScore < aiScore) result = '💀 AIの勝ち…';
+  else result = '🤝 引き分け';
+  document.getElementById('winResult').textContent = result;
 }
 
-function applyUIColor(){
-  if(!developerMode) return;
-  const color=document.getElementById('uiColor').value;
-  document.documentElement.style.setProperty('--main', color);
+// ----------------------------
+// 画面切り替え
+// ----------------------------
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+}
+
+function stopGame() {
+  showScreen('titleScreen');
+}
+
+// ----------------------------
+// ヘルパー
+// ----------------------------
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
 }
