@@ -32,19 +32,11 @@
   <button onclick="startGame()">▶ ゲーム開始</button>
   <button onclick="showRules()">📖 ルール</button>
 
-  <div id="titlesAchievements">
-    <h3>🏆 称号一覧</h3>
-    <ul id="titleList">
-      <li>称号1</li>
-      <li>称号2</li>
-      <li>称号3</li>
-    </ul>
-
+  <!-- 実績 -->
+  <div id="achievements">
     <h3>📜 実績</h3>
     <ul id="achievementList">
-      <li>実績1</li>
-      <li>実績2</li>
-      <li>実績3</li>
+      <li>勝利回数: <span id="winCount">0</span></li>
     </ul>
   </div>
 </div>
@@ -74,7 +66,7 @@
   <div id="board" class="board"></div>
 </div>
 
-<!-- 勝利画面 -->
+<!-- 結果画面 -->
 <div id="winScreen" class="screen">
   <h1>🏆 結果</h1>
   <p>あなた: <span id="playerPairs">0</span> 枚</p>
