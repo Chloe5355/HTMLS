@@ -1,8 +1,8 @@
 :root {
-  --bg-color: #f0f0f0;
-  --card-bg-color: #fff;
-  --card-border-color: #333;
-  --card-match-bg-color: #8f8;
+  --bg-color: #ffffff;          /* 背景白 */
+  --card-bg-color: #ffffff;     /* カード白 */
+  --card-border-color: #333333;
+  --card-match-bg-color: #8f8;  /* 揃ったカードは緑 */
   --button-bg-color: #4CAF50;
   --button-text-color: #fff;
 }
