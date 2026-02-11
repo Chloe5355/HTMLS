@@ -54,7 +54,7 @@ function checkPair(){
     currentTurn==='player'?playerScore++:aiScore++;
     matchedPairs++; flippedCards=[]; updateScores();
     if(matchedPairs>=totalPairs) return endGame();
-    if(currentTurn==='ai') setTimeout(aiTurn,1200); // AIの遅延
+    if(currentTurn==='ai') setTimeout(aiTurn,1200); 
     return;
   }
   setTimeout(()=>{
@@ -151,3 +151,7 @@ function renderAchievements(){
   achievements.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; list.appendChild(li); });
 }
 function equipCurrentTitle(){ document.getElementById('equippedTitle').textContent=currentEquippedTitle; }
+
+// ルールモーダル
+function showRules(){ document.getElementById('rulesModal').style.display='flex'; }
+function closeRules(){ document.getElementById('rulesModal').style.display='none'; }
