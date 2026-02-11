@@ -3,13 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>原神風元素神経衰弱 レスポンシブ版</title>
+<title>原神風元素神経衰弱 完全版</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+<!-- タイトル画面 -->
 <div id="titleScreen" class="screen active">
   <h1>原神風元素神経衰弱</h1>
+  <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/Columbina.png" alt="旗">
+
   <label for="boardSize">盤面サイズ:</label>
   <select id="boardSize">
     <option value="4">4x4</option>
@@ -18,6 +21,7 @@
     <option value="16">16x16</option>
   </select>
   <br>
+
   <label for="aiDifficulty">AI難易度:</label>
   <select id="aiDifficulty">
     <option value="easy">弱</option>
@@ -28,20 +32,37 @@
   <button onclick="startGame()">▶ ゲーム開始</button>
 </div>
 
+<!-- ゲーム画面 -->
 <div id="gameScreen" class="screen">
-  <button onclick="stopGame()">⏹ ゲーム終了</button>
+  <div>
+    <button onclick="stopGame()">⏹ ゲーム終了</button>
+  </div>
   <div id="board" class="board"></div>
+
   <div id="status">
     <p>自分: <span id="playerScore">0</span></p>
     <p>AI: <span id="aiScore">0</span></p>
     <p>現在のターン: <span id="currentTurnDisplay">あなた</span></p>
   </div>
+
+  <div id="titleFrame">
+    <span>装備中の称号: <span id="equippedTitle">なし</span></span>
+  </div>
+  <button onclick="equipCurrentTitle()">🎖 称号を装備</button>
+
+  <h3>📜 称号一覧</h3>
+  <ul id="titleList"></ul>
+
+  <h3>🏆 実績</h3>
+  <ul id="achievementList"></ul>
 </div>
 
+<!-- 結果画面 -->
 <div id="winScreen" class="screen">
   <h1>🏆 結果</h1>
   <p id="winResult"></p>
   <p>自分: <span id="finalPlayerScore">0</span> - AI: <span id="finalAIScore">0</span></p>
+  <p>獲得称号: <span id="winTitle">なし</span></p>
   <button onclick="startGame()">次のゲーム</button>
   <button onclick="stopGame()">タイトルに戻る</button>
 </div>
