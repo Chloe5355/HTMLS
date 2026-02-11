@@ -14,7 +14,7 @@
   <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/Columbina.png" alt="旗">
 
   <label for="element">元素テーマ:</label>
-  <select id="element">
+  <select id="element" onchange="changeElement()">
     <option value="wind">🌪 風</option>
     <option value="fire">🔥 炎</option>
     <option value="water">💧 水</option>
@@ -32,6 +32,15 @@
   </select>
   <br>
   <button onclick="startGame()">▶ ゲーム開始</button>
+
+  <!-- デベロッパーパネル -->
+  <div id="devPanel">
+    <h3>🎨 UIカラー変更</h3>
+    <label>背景色: <input type="color" id="bgColor" value="#f0f0f0"/></label>
+    <label>カード色: <input type="color" id="cardColor" value="#fff"/></label>
+    <label>カード枠色: <input type="color" id="cardBorderColor" value="#333"/></label>
+    <button onclick="applyUIColor()">適用</button>
+  </div>
 </div>
 
 <!-- ゲーム画面 -->
