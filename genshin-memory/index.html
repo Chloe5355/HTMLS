@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原神風元素神経衰弱 完全Genshin版</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="titleScreen" class="screen active">
+  <h1>原神風元素神経衰弱</h1>
+  <label for="element">元素テーマ:</label>
+  <select id="element" onchange="changeElement()">
+    <option value="wind">🌪 風</option>
+    <option value="fire">🔥 炎</option>
+    <option value="water">💧 水</option>
+    <option value="ice">❄ 氷</option>
+    <option value="thunder">⚡ 雷</option>
+    <option value="rock">🪨 岩</option>
+    <option value="grass">🌿 草</option>
+  </select>
+  <br>
+  <label for="aiDifficulty">AI難易度:</label>
+  <select id="aiDifficulty">
+    <option value="easy">弱</option>
+    <option value="medium">中</option>
+    <option value="hard">強</option>
+  </select>
+  <br>
+  <button onclick="startGame()">▶ ゲーム開始</button>
+</div>
+
+<div id="gameScreen" class="screen">
+  <div>
+    <button onclick="stopGame()">⏹ ゲーム終了</button>
+  </div>
+  <div id="board" class="board"></div>
+
+  <div id="status">
+    <p>連勝: <span id="streak">0</span></p>
+    <p>勝率: <span id="winRate">0%</span></p>
+  </div>
+
+  <div id="titleFrame"><span id="equippedTitle">称号なし</span></div>
+  <button onclick="equipCurrentTitle()">🎖 称号を装備</button>
+
+  <h3>📜 称号一覧</h3>
+  <ul id="titleList"></ul>
+
+  <h3>🏆 実績</h3>
+  <ul id="achievementList"></ul>
+
+  <div id="devPanel" style="display:none">
+    <h3>🎨 Developer Mode</h3>
+    <input type="color" id="uiColor"/>
+    <button onclick="applyUIColor()">適用</button>
+  </div>
+</div>
+
+<script src="js/game.js"></script>
+</body>
+</html>
