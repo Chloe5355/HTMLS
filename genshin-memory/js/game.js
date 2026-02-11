@@ -10,6 +10,11 @@ currentTurn = 'player';
 
 let cardEmojis = ['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡','🪨','🌿'];
 
+// 表示時間設定（ミリ秒）
+const flipDelay = 600;   // 2枚めくった後の判定までの待機時間
+const showDelay = 1200;  // カード表示時間（揃わなかった場合）
+const aiDelay   = 1200;  // AIターン遅延
+
 // --------------------------
 // ゲーム開始
 function startGame() {
@@ -24,7 +29,6 @@ function startGame() {
   totalPairs = (size * size) / 2;
   document.documentElement.style.setProperty('--grid-size', size);
 
-  // 必要なペア数を用意
   let neededPairs = Math.ceil(totalPairs / cardEmojis.length);
   let temp = [];
   for (let i = 0; i < neededPairs; i++) temp.push(...cardEmojis);
@@ -63,7 +67,7 @@ function playerFlip(card) {
   card.textContent = card.dataset.value;
   flippedCards.push(card);
 
-  if (flippedCards.length === 2) setTimeout(checkPair, 400); // プレイヤー判定0.4秒
+  if (flippedCards.length === 2) setTimeout(checkPair, flipDelay); // プレイヤー判定
 }
 
 function checkPair() {
@@ -83,24 +87,22 @@ function checkPair() {
 
     if (matchedPairs >= totalPairs) return endGame();
 
-    // AIがターンなら遅延して連続めくり
-    if (currentTurn === 'ai') setTimeout(aiTurn, 1000);
+    if (currentTurn === 'ai') setTimeout(aiTurn, aiDelay);
     return;
   }
 
-  // ペアでない場合
   setTimeout(() => {
     c1.textContent = '?';
     c2.textContent = '?';
     flippedCards = [];
     switchTurn();
-  }, 500); // プレイヤーがめくったカードを0.5秒表示
+  }, showDelay);
 }
 
 function switchTurn() {
   currentTurn = currentTurn === 'player' ? 'ai' : 'player';
   updateTurnDisplay();
-  if (currentTurn === 'ai') setTimeout(aiTurn, 1000); // AIターン遅延1秒
+  if (currentTurn === 'ai') setTimeout(aiTurn, aiDelay);
 }
 
 // --------------------------
@@ -129,16 +131,16 @@ function aiTurn() {
 
       if (matchedPairs >= totalPairs) return endGame();
 
-      setTimeout(aiTurn, 1000); // 揃った場合も1秒遅延して連続めくり
+      setTimeout(aiTurn, aiDelay); // 揃った場合も遅延して連続めくり
     } else {
       setTimeout(() => {
         c1.textContent = '?';
         c2.textContent = '?';
         flippedCards = [];
         switchTurn();
-      }, 1000); // カード表示1秒で閉じる
+      }, showDelay); // AIカードを表示してから閉じる
     }
-  }, 1000); // AIがめくってから1秒待つ
+  }, showDelay);
 }
 
 function pickRandomPair(available) {
