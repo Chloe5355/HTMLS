@@ -29,7 +29,6 @@ function changeElement() {
     grass: '🌿'
   };
 
-  // 先頭3枚のカードにテーマ絵文字を追加
   cardEmojis = ['🗡️','🏹','📖'].map(e => e + elementEmojiMap[currentElement])
                .concat(['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡'].slice(3));
 }
@@ -117,18 +116,17 @@ function playerFlip(card) {
 // ----------------------------
 function checkPair() {
   const [c1, c2] = flippedCards;
+  if (!c1 || !c2) return;
 
   if (c1.dataset.value === c2.dataset.value) {
     c1.classList.add('matched');
     c2.classList.add('matched');
 
-    if (currentTurn === 'player') {
-      playerScore++;
-      document.getElementById('playerScore').textContent = playerScore;
-    } else {
-      aiScore++;
-      document.getElementById('aiScore').textContent = aiScore;
-    }
+    if (currentTurn === 'player') playerScore++;
+    else aiScore++;
+
+    document.getElementById('playerScore').textContent = playerScore;
+    document.getElementById('aiScore').textContent = aiScore;
 
     matchedPairs++;
     flippedCards = [];
@@ -136,7 +134,6 @@ function checkPair() {
     if (matchedPairs >= totalPairs) return endGame();
 
     if (currentTurn === 'ai') setTimeout(aiTurn, 500);
-
     return;
   }
 
@@ -167,27 +164,18 @@ function aiTurn() {
   const available = Array.from(document.querySelectorAll('.card:not(.matched)'));
   if (available.length < 2) return;
 
-  let [c1, c2] = null;
-
-  if (difficulty === 'easy') [c1, c2] = pickRandomPair(available);
-  else if (difficulty === 'medium') [c1, c2] = mediumAI(available);
-  else [c1, c2] = hardAI(available);
+  let [c1, c2] = pickRandomPair(available);
 
   c1.textContent = c1.dataset.value;
   c2.textContent = c2.dataset.value;
 
-  aiMemory[c1.dataset.value] = aiMemory[c1.dataset.value] || [];
-  if (!aiMemory[c1.dataset.value].includes(c1.dataset.index)) aiMemory[c1.dataset.value].push(c1.dataset.index);
-
-  aiMemory[c2.dataset.value] = aiMemory[c2.dataset.value] || [];
-  if (!aiMemory[c2.dataset.value].includes(c2.dataset.index)) aiMemory[c2.dataset.value].push(c2.dataset.index);
-
   flippedCards = [c1, c2];
+
   setTimeout(checkPair, 500);
 }
 
 // ----------------------------
-// AIロジック
+// AIランダム選択
 // ----------------------------
 function pickRandomPair(available) {
   let c1, c2;
@@ -196,18 +184,6 @@ function pickRandomPair(available) {
     c2 = available[Math.floor(Math.random() * available.length)];
   }
   return [c1, c2];
-}
-
-function mediumAI(available) {
-  for (let val in aiMemory) {
-    const indices = aiMemory[val].filter(i => available.find(c => c.dataset.index == i));
-    if (indices.length >= 2) return [available.find(c => c.dataset.index == indices[0]), available.find(c => c.dataset.index == indices[1])];
-  }
-  return pickRandomPair(available);
-}
-
-function hardAI(available) {
-  return mediumAI(available);
 }
 
 // ----------------------------
@@ -239,7 +215,7 @@ function stopGame() {
 }
 
 // ----------------------------
-// ヘルパー関数
+// ヘルパー
 // ----------------------------
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
