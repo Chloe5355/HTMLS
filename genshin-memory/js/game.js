@@ -51,7 +51,7 @@ function renderBoard() {
     card.className = 'card';
     card.dataset.value = v;
     card.dataset.index = i;
-    card.textContent = ' ';
+    card.textContent = '';  // ← まだ開いていないカードは空白
     card.onclick = () => playerFlip(card);
     board.appendChild(card);
   });
@@ -92,8 +92,8 @@ function checkPair() {
   }
 
   setTimeout(() => {
-    c1.textContent = '?';
-    c2.textContent = '?';
+    c1.textContent = ''; // ← 閉じるときも空白に
+    c2.textContent = '';
     flippedCards = [];
     switchTurn();
   }, showDelay);
@@ -134,11 +134,11 @@ function aiTurn() {
       setTimeout(aiTurn, aiDelay); // 揃った場合も遅延して連続めくり
     } else {
       setTimeout(() => {
-        c1.textContent = '?';
-        c2.textContent = '?';
+        c1.textContent = ''; // ← 閉じるときも空白
+        c2.textContent = '';
         flippedCards = [];
         switchTurn();
-      }, showDelay); // AIカードを表示してから閉じる
+      }, showDelay); // AIカード表示時間
     }
   }, showDelay);
 }
