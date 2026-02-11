@@ -3,7 +3,7 @@ let aiLevel = 'medium';
 let board = [];
 let selected = [];
 let pairsFound = { player: 0, ai: 0 };
-let aiMemory = {}; // icon: [card1, card2,...]
+let aiMemory = {};
 
 function startGame() {
   document.getElementById('titleScreen').classList.remove('active');
@@ -118,15 +118,20 @@ function pickAICards(available){
         return [knownCard, random];
       }
     }
-    return pickAICards(available); // fallback random
+    let idx1=Math.floor(Math.random()*available.length);
+    let idx2=Math.floor(Math.random()*available.length);
+    if(idx1===idx2) idx2=(idx2+1)%available.length;
+    return [available[idx1], available[idx2]];
   } else if(aiLevel==='hard'){
-    // 完全に既知カードがあれば揃える
     for(let icon in aiMemory){
       if(aiMemory[icon].length>=2){
         return [aiMemory[icon][0], aiMemory[icon][1]];
       }
     }
-    return pickAICards(available); // random fallback
+    let idx1=Math.floor(Math.random()*available.length);
+    let idx2=Math.floor(Math.random()*available.length);
+    if(idx1===idx2) idx2=(idx2+1)%available.length;
+    return [available[idx1], available[idx2]];
   }
 }
 
