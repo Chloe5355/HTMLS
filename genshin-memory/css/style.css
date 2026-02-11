@@ -23,14 +23,14 @@ h1 { margin-bottom: 10px; }
 
 /* タイトル画像 */
 .flag {
-  width: 100px; 
+  width: 128px; 
   max-width: 20vw;
   border-radius: 50%; 
-  border: 2px solid black;       /* 黒い枠線 */
-  margin: 25px 0.25px;           /* 上下25px、左右0.25pxの余白 */
+  border: 1.5px solid black;       /* 黒い枠線を1.5pxに変更 */
+  margin: 20px 0.2px;              /* 上下20px、左右0.2pxの余白 */
   display: block;
   margin-left: auto;
-  margin-right: auto;            /* 中央配置 */
+  margin-right: auto;              /* 中央配置 */
 }
 
 .board {
