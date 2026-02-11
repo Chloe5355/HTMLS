@@ -6,9 +6,11 @@ let pairsFound = { player:0, ai:0 };
 let aiMemory = {};
 let gridSize = 8;
 let winCount = 0;
+let lockBoard = false; // ターン中カードクリックロック
 
 // AI思考時間（ミリ秒）
 const aiDelay = { easy: 1500, medium: 1000, hard: 700 };
+const aiExtraDelay = { success: 600, fail: 1200 }; // 揃った場合／失敗時
 
 // ---------------- GAME START ----------------
 function startGame() {
@@ -22,6 +24,7 @@ function startGame() {
   pairsFound = { player:0, ai:0 };
   aiMemory = {};
   currentTurn = 'player';
+  lockBoard = false;
 
   initBoard();
   updateScore();
@@ -60,11 +63,13 @@ function initBoard(){
   selected = [];
   updateScore();
   currentTurn = 'player';
+  lockBoard = false;
 }
 
 // ---------------- PLAYER TURN ----------------
 function playerTurn(card){
   if(currentTurn !== 'player') return;
+  if(lockBoard) return; 
   if(selected.includes(card) || card.classList.contains('matched')) return;
 
   card.textContent = card.dataset.icon;
@@ -72,14 +77,20 @@ function playerTurn(card){
   rememberCard(card);
 
   if(selected.length === 2) {
-    setTimeout(()=>checkMatch('player'), 1000);
+    lockBoard = true;
+    setTimeout(()=>{
+      checkMatch('player');
+      lockBoard = false;
+    }, 1000);
   }
+
   updateScore();
 }
 
 // ---------------- AI TURN ----------------
 function aiTurn(){
   if(currentTurn !== 'ai') return;
+  lockBoard = true; 
   let available = board.filter(c=>!c.classList.contains('matched') && !selected.includes(c));
   if(available.length<2) return;
 
@@ -92,14 +103,19 @@ function aiTurn(){
   selected = [c1,c2];
 
   updateScore();
-  setTimeout(()=>checkMatch('ai'), aiDelay[aiLevel]);
+
+  // 揃っているか確認して遅延を調整
+  let delay = (c1.dataset.icon === c2.dataset.icon) ? aiExtraDelay.success : aiExtraDelay.fail;
+  setTimeout(()=>{
+    checkMatch('ai');
+    lockBoard = false;
+  }, delay);
 }
 
 // ---------------- CHECK MATCH ----------------
 function checkMatch(player){
   const [c1,c2] = selected;
   if(c1.dataset.icon === c2.dataset.icon){
-    // ペア成功
     c1.classList.add('matched');
     c2.classList.add('matched');
     pairsFound[player]++;
@@ -110,12 +126,10 @@ function checkMatch(player){
     if(isGameOver()) {
       showWin();
     } else {
-      // 揃った場合は同じターンで続ける
       if(player==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
     }
 
   } else {
-    // 揃わなかった場合はターン交代
     setTimeout(()=>{
       c1.textContent='';
       c2.textContent='';
@@ -142,7 +156,7 @@ function removeFromMemory(icon, cards){
 
 // ---------------- SMART AI CARD PICK ----------------
 function pickSmartAICards(available){
-  // 1. 覚えたカードで揃えられるペアをランダムに選ぶ
+  // 覚えたカードで揃えられるペアをランダムに選ぶ
   let possiblePairs = [];
   for(let icon in aiMemory){
     let knownCards = aiMemory[icon].filter(c=>available.includes(c));
@@ -152,7 +166,7 @@ function pickSmartAICards(available){
     return possiblePairs[Math.floor(Math.random()*possiblePairs.length)];
   }
 
-  // 2. 覚えたカード1枚＋ランダム
+  // 覚えたカード1枚＋ランダム
   let singleOptions = [];
   for(let icon in aiMemory){
     let knownCards = aiMemory[icon].filter(c=>available.includes(c));
@@ -165,7 +179,7 @@ function pickSmartAICards(available){
     return [known, randomCard];
   }
 
-  // 3. 完全ランダム
+  // 完全ランダム
   let idx1=Math.floor(Math.random()*available.length);
   let idx2=Math.floor(Math.random()*available.length);
   if(idx1===idx2) idx2=(idx2+1)%available.length;
