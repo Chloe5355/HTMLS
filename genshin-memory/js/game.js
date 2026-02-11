@@ -9,14 +9,49 @@ let flippedCards = [];
 let cards = [];
 let aiMemory = {};
 let currentTurn = 'player';
+let cardEmojis = ['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡'];
+let currentElement = 'wind';
 
-// カード絵文字
-const cardEmojis = ['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡'];
+// ----------------------------
+// テーマ変更
+// ----------------------------
+function changeElement() {
+  const sel = document.getElementById('element');
+  currentElement = sel.value;
+
+  const elementEmojiMap = {
+    wind: '🌪',
+    fire: '🔥',
+    water: '💧',
+    ice: '❄',
+    thunder: '⚡',
+    rock: '🪨',
+    grass: '🌿'
+  };
+
+  // 先頭3枚のカードにテーマ絵文字を追加
+  cardEmojis = ['🗡️','🏹','📖'].map(e => e + elementEmojiMap[currentElement])
+               .concat(['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡'].slice(3));
+}
+
+// ----------------------------
+// UIカラー変更
+// ----------------------------
+function applyUIColor() {
+  const bg = document.getElementById('bgColor').value;
+  const card = document.getElementById('cardColor').value;
+  const border = document.getElementById('cardBorderColor').value;
+
+  document.documentElement.style.setProperty('--bg-color', bg);
+  document.documentElement.style.setProperty('--card-bg-color', card);
+  document.documentElement.style.setProperty('--card-border-color', border);
+}
 
 // ----------------------------
 // ゲーム開始
 // ----------------------------
 function startGame() {
+  changeElement();
   playerScore = 0;
   aiScore = 0;
   matchedPairs = 0;
@@ -25,7 +60,6 @@ function startGame() {
   currentTurn = 'player';
   updateTurnDisplay();
 
-  // カード作成とシャッフル
   cards = [];
   cardEmojis.forEach(emoji => {
     cards.push(emoji);
@@ -101,13 +135,11 @@ function checkPair() {
 
     if (matchedPairs >= totalPairs) return endGame();
 
-    // AIの場合は次のターンも自動で続行
     if (currentTurn === 'ai') setTimeout(aiTurn, 500);
 
-    return; // 揃った場合は同じターンで続行
+    return;
   }
 
-  // 揃わなかった場合はターン交代
   setTimeout(() => {
     c1.textContent = '?';
     c2.textContent = '?';
@@ -144,7 +176,6 @@ function aiTurn() {
   c1.textContent = c1.dataset.value;
   c2.textContent = c2.dataset.value;
 
-  // AI記憶に追加
   aiMemory[c1.dataset.value] = aiMemory[c1.dataset.value] || [];
   if (!aiMemory[c1.dataset.value].includes(c1.dataset.index)) aiMemory[c1.dataset.value].push(c1.dataset.index);
 
@@ -152,7 +183,7 @@ function aiTurn() {
   if (!aiMemory[c2.dataset.value].includes(c2.dataset.index)) aiMemory[c2.dataset.value].push(c2.dataset.index);
 
   flippedCards = [c1, c2];
-  setTimeout(checkPair, 500); // AIもcheckPairで判定
+  setTimeout(checkPair, 500);
 }
 
 // ----------------------------
