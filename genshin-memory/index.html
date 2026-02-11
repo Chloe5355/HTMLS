@@ -13,17 +13,14 @@
   <h1>真剣衰弱</h1>
   <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/img/Columbina.png" alt="旗">
 
-  <label for="element">元素テーマ:</label>
-  <select id="element" onchange="changeElement()">
-    <option value="wind">🌪 風</option>
-    <option value="fire">🔥 炎</option>
-    <option value="water">💧 水</option>
-    <option value="ice">❄ 氷</option>
-    <option value="thunder">⚡ 雷</option>
-    <option value="rock">🪨 岩</option>
-    <option value="grass">🌿 草</option>
+  <label for="boardSize">盤面サイズ:</label>
+  <select id="boardSize">
+    <option value="4">4x4</option>
+    <option value="8" selected>8x8</option>
+    <option value="16">16x16</option>
   </select>
   <br>
+
   <label for="aiDifficulty">AI難易度:</label>
   <select id="aiDifficulty">
     <option value="easy">弱</option>
@@ -31,19 +28,25 @@
     <option value="hard">強</option>
   </select>
   <br>
+
   <button onclick="startGame()">▶ ゲーム開始</button>
   <button onclick="showRules()">📖 ルール</button>
 
-  <h3>🏆 称号一覧</h3>
-  <ul id="titleList"></ul>
+  <!-- 称号・実績（タイトル画面のみ表示） -->
+  <div id="titlesAchievements">
+    <h3>🏆 称号一覧</h3>
+    <ul id="titleList">
+      <li>称号1</li>
+      <li>称号2</li>
+      <li>称号3</li>
+    </ul>
 
-  <h3>📜 実績</h3>
-  <ul id="achievementList"></ul>
-
-  <div id="devPanel" style="display:none">
-    <h3>🎨 Developer Mode</h3>
-    <input type="color" id="uiColor"/>
-    <button onclick="applyUIColor()">適用</button>
+    <h3>📜 実績</h3>
+    <ul id="achievementList">
+      <li>実績1</li>
+      <li>実績2</li>
+      <li>実績3</li>
+    </ul>
   </div>
 </div>
 
@@ -67,8 +70,9 @@
 <!-- 勝利画面 -->
 <div id="winScreen" class="screen">
   <h1>🏆 結果</h1>
-  <p>連勝: <span id="winStreak">0</span></p>
-  <p>獲得称号: <span id="winTitle">なし</span></p>
+  <p>あなた: <span id="playerPairs">0</span> 枚</p>
+  <p>AI: <span id="aiPairs">0</span> 枚</p>
+  <p>勝者: <span id="winner">なし</span></p>
   <button onclick="nextGame()">次のゲーム</button>
   <button onclick="stopGame()">タイトルに戻る</button>
 </div>
