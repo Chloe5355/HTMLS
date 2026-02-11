@@ -7,6 +7,13 @@ let aiMemory = {};
 let gridSize = 8;
 let winCount = 0;
 
+// AI思考時間（ミリ秒）
+const aiDelay = {
+  easy: 1500,
+  medium: 1000,
+  hard: 700
+};
+
 function startGame() {
   gridSize = parseInt(document.getElementById('boardSize').value);
   document.documentElement.style.setProperty('--grid-size', gridSize);
@@ -85,7 +92,7 @@ function checkMatch(player){
     updateScore();
 
     if(isGameOver()) showWin();
-    else if(player==='ai') setTimeout(aiTurn,1000);
+    else if(player==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
   } else {
     setTimeout(()=>{
       c1.textContent='';
@@ -93,8 +100,8 @@ function checkMatch(player){
       selected=[];
       currentTurn = (player==='player')?'ai':'player';
       updateScore();
-      if(currentTurn==='ai') setTimeout(aiTurn,1000);
-    },1000);
+      if(currentTurn==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
+    }, 1000);
   }
 }
 
@@ -118,7 +125,7 @@ function aiTurn(){
   selected = [c1,c2];
 
   updateScore();
-  setTimeout(()=>checkMatch('ai'),1000);
+  setTimeout(()=>checkMatch('ai'), aiDelay[aiLevel]);
 }
 
 function pickAICards(available){
@@ -139,12 +146,13 @@ function pickAICards(available){
     let idx2=Math.floor(Math.random()*available.length);
     if(idx1===idx2) idx2=(idx2+1)%available.length;
     return [available[idx1], available[idx2]];
-  } else {
+  } else { // hard
     for(let icon in aiMemory){
       if(aiMemory[icon].length>=2){
         return [aiMemory[icon][0], aiMemory[icon][1]];
       }
     }
+    // fallback
     let idx1=Math.floor(Math.random()*available.length);
     let idx2=Math.floor(Math.random()*available.length);
     if(idx1===idx2) idx2=(idx2+1)%available.length;
