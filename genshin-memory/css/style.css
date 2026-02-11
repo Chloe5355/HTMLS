@@ -1,7 +1,16 @@
+:root {
+  --bg-color: #f0f0f0;
+  --card-bg-color: #fff;
+  --card-border-color: #333;
+  --card-match-bg-color: #8f8;
+  --button-bg-color: #4CAF50;
+  --button-text-color: #fff;
+}
+
 body {
   font-family: Arial, sans-serif;
   text-align: center;
-  background: #f0f0f0;
+  background: var(--bg-color);
   margin: 0;
   padding: 0;
 }
@@ -32,8 +41,8 @@ body {
 .card {
   width: 80px;
   height: 80px;
-  background: #fff;
-  border: 2px solid #333;
+  background: var(--card-bg-color);
+  border: 2px solid var(--card-border-color);
   border-radius: 10px;
   font-size: 32px;
   display: flex;
@@ -45,10 +54,24 @@ body {
 }
 
 .card.matched {
-  background: #8f8;
+  background: var(--card-match-bg-color);
   cursor: default;
 }
 
 .card:hover {
   transform: scale(1.1);
+}
+
+button {
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+button:hover {
+  opacity: 0.9;
 }
