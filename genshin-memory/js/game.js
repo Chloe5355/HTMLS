@@ -51,7 +51,7 @@ function renderBoard() {
     card.className = 'card';
     card.dataset.value = v;
     card.dataset.index = i;
-    card.textContent = '?';
+    card.textContent = ' ';
     card.onclick = () => playerFlip(card);
     board.appendChild(card);
   });
