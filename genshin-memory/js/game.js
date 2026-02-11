@@ -8,7 +8,7 @@ let matchedPairs = 0;
 let flippedCards = [];
 let cards = [];
 let aiMemory = {};
-let currentTurn = 'player'; // 'player' または 'ai'
+let currentTurn = 'player';
 
 // カード絵文字
 const cardEmojis = ['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡'];
@@ -17,6 +17,7 @@ const cardEmojis = ['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡'];
 // ゲーム開始
 // ----------------------------
 function startGame() {
+  // 初期化
   playerScore = 0;
   aiScore = 0;
   matchedPairs = 0;
@@ -25,6 +26,7 @@ function startGame() {
   currentTurn = 'player';
   updateTurnDisplay();
 
+  // カード作成とシャッフル
   cards = [];
   cardEmojis.forEach(emoji => {
     cards.push(emoji);
@@ -120,7 +122,7 @@ function switchTurn() {
 }
 
 // ----------------------------
-// AIターン（難易度別）
+// AIターン
 // ----------------------------
 function aiTurn() {
   if (currentTurn !== 'ai') return;
@@ -170,7 +172,7 @@ function mediumAI(available) {
 }
 
 function hardAI(available) {
-  return mediumAI(available); // 完全最適化可能
+  return mediumAI(available);
 }
 
 // ----------------------------
@@ -193,7 +195,8 @@ function endGame() {
 // ----------------------------
 function showScreen(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
+  const screen = document.getElementById(screenId);
+  if (screen) screen.classList.add('active');
 }
 
 function stopGame() {
