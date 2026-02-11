@@ -25,22 +25,37 @@ body {
   margin: 20px 0;
 }
 
+/* カードフリップ */
 .card {
   width: 70px;
   height: 100px;
-  background: var(--card);
+  perspective: 600px;
+}
+.card-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+.card.open .card-inner { transform: rotateY(180deg); }
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%; height: 100%;
+  backface-visibility: hidden;
   border: 2px solid var(--main);
   border-radius: 12px;
-  cursor: pointer;
-  font-size: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-}
-.card.open {
   font-size: 30px;
+}
+.card-front { background: var(--card); }
+.card-back {
   background: var(--card-open);
+  transform: rotateY(180deg);
   box-shadow: 0 0 20px var(--main);
   animation: glow 1.2s ease-in-out infinite alternate;
 }
@@ -68,3 +83,21 @@ body {
 button { margin:5px; padding:6px 12px; border-radius:6px; cursor:pointer; }
 ul { padding-left:0; }
 li { list-style:none; padding:4px 0; border-left:3px solid var(--main); margin-bottom:4px; }
+
+/* 勝利画面 */
+#winScreen {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  color:#fff; font-size:2em;
+  text-shadow:0 0 10px #000;
+  z-index:100;
+  animation: winGlow 2s infinite alternate;
+}
+@keyframes winGlow {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+  100% { filter: brightness(1); }
+}
