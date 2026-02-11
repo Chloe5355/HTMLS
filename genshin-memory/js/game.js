@@ -23,7 +23,7 @@ function startGame(){
 
   renderBoard();
   updateScores();
-  showScreen('gameScreen'); // ゲーム画面では称号・実績は非表示
+  showScreen('gameScreen'); 
 }
 
 function renderBoard(){
@@ -54,7 +54,7 @@ function checkPair(){
     currentTurn==='player'?playerScore++:aiScore++;
     matchedPairs++; flippedCards=[]; updateScores();
     if(matchedPairs>=totalPairs) return endGame();
-    if(currentTurn==='ai') setTimeout(aiTurn,500);
+    if(currentTurn==='ai') setTimeout(aiTurn,1200); // AIの遅延
     return;
   }
   setTimeout(()=>{
@@ -68,7 +68,7 @@ function checkPair(){
 function switchTurn(){ 
   currentTurn=currentTurn==='player'?'ai':'player'; 
   updateTurnDisplay();
-  if(currentTurn==='ai') setTimeout(aiTurn,500);
+  if(currentTurn==='ai') setTimeout(aiTurn,1200);
 }
 
 // --------------------------
@@ -90,16 +90,16 @@ function aiTurn(){
       c1.classList.add('matched'); c2.classList.add('matched');
       aiScore++; matchedPairs++; flippedCards=[]; updateScores();
       if(matchedPairs>=totalPairs) return endGame();
-      setTimeout(aiTurn, 600); // 揃ったら連続めくり
+      setTimeout(aiTurn, 1200); 
     } else {
       setTimeout(()=>{
         c1.textContent='?';
         c2.textContent='?';
         flippedCards=[];
         switchTurn();
-      }, 700);
+      }, 1500);
     }
-  }, 600);
+  }, 1200);
 }
 
 function pickRandomPair(available){
