@@ -5,7 +5,7 @@ let selected = [];
 let pairsFound = { player:0, ai:0 };
 let aiMemory = {};
 let gridSize = 8;
-let winCount = 0; // 実績カウント
+let winCount = 0;
 
 function startGame() {
   gridSize = parseInt(document.getElementById('boardSize').value);
@@ -46,7 +46,7 @@ function initBoard(){
     let card = document.createElement('div');
     card.className='card';
     card.dataset.icon = cardPairs[i];
-    card.textContent = ''; // 空白
+    card.textContent = ''; 
     card.onclick = ()=>playerTurn(card);
     board.push(card);
     boardEl.appendChild(card);
@@ -139,7 +139,7 @@ function pickAICards(available){
     let idx2=Math.floor(Math.random()*available.length);
     if(idx1===idx2) idx2=(idx2+1)%available.length;
     return [available[idx1], available[idx2]];
-  } else { // hard
+  } else {
     for(let icon in aiMemory){
       if(aiMemory[icon].length>=2){
         return [aiMemory[icon][0], aiMemory[icon][1]];
