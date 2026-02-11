@@ -4,6 +4,8 @@
   --bg2: #0b1324;
   --card: #243b6b;
   --card-open: #fff6d0;
+  --card-width: 70px;
+  --card-height: 100px;
 }
 
 body {
@@ -12,24 +14,27 @@ body {
   color: var(--main);
   text-align: center;
   margin:0; padding:10px;
+  overflow-x: hidden;
 }
 
-.screen { display:none; }
+.screen { display:none; position: relative; z-index:0; }
 .screen.active { display:block; }
 
 .board {
   display: grid;
-  grid-template-columns: repeat(4, 70px);
+  grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
   gap: 10px;
   justify-content: center;
   margin: 20px 0;
+  z-index: 1;
 }
 
-/* カードフリップ */
 .card {
-  width: 70px;
-  height: 100px;
+  width: var(--card-width);
+  height: var(--card-height);
   perspective: 600px;
+  position: relative;
+  z-index:1;
 }
 .card-inner {
   width: 100%;
@@ -50,7 +55,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
+  font-size: calc(var(--card-width) * 0.43);
 }
 .card-front { background: var(--card); }
 .card-back {
@@ -59,45 +64,31 @@ body {
   box-shadow: 0 0 20px var(--main);
   animation: glow 1.2s ease-in-out infinite alternate;
 }
-@keyframes glow {
-  0% { box-shadow: 0 0 10px var(--main); }
-  100% { box-shadow: 0 0 30px var(--main); }
-}
+@keyframes glow { 0% {box-shadow:0 0 10px var(--main);} 100% {box-shadow:0 0 30px var(--main);} }
 
-#titleFrame {
-  padding: 8px 16px;
-  border-radius: 12px;
-  border: 2px solid var(--main);
-  margin: 10px auto;
-  display: inline-block;
-}
-#titleFrame.gold { border-color: gold; box-shadow: 0 0 15px gold; }
-#titleFrame.developer {
-  border:3px solid gold;
-  background: linear-gradient(135deg, rgba(255,215,0,0.35), rgba(255,255,255,0.1));
-  box-shadow:0 0 20px gold,0 0 40px rgba(255,215,0,0.6);
-  animation: devGlow 3s infinite alternate;
-}
+#titleFrame { padding:8px 16px; border-radius:12px; border:2px solid var(--main); margin:10px auto; display:inline-block; position:relative; z-index:5; }
+#titleFrame.gold { border-color: gold; box-shadow:0 0 15px gold; }
+#titleFrame.developer { border:3px solid gold; background: linear-gradient(135deg, rgba(255,215,0,0.35), rgba(255,255,255,0.1)); box-shadow:0 0 20px gold,0 0 40px rgba(255,215,0,0.6); animation: devGlow 3s infinite alternate; }
 @keyframes devGlow { from {filter:brightness(1);} to {filter:brightness(1.3);} }
 
-button { margin:5px; padding:6px 12px; border-radius:6px; cursor:pointer; }
+button { margin:5px; padding:8px 14px; border-radius:6px; cursor:pointer; position: relative; z-index:5; font-size: 1rem; }
 ul { padding-left:0; }
 li { list-style:none; padding:4px 0; border-left:3px solid var(--main); margin-bottom:4px; }
 
-/* 勝利画面 */
 #winScreen {
-  position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  display:flex; flex-direction:column;
-  justify-content:center; align-items:center;
-  color:#fff; font-size:2em;
-  text-shadow:0 0 10px #000;
-  z-index:100;
-  animation: winGlow 2s infinite alternate;
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  color:#fff; font-size:2em; text-shadow:0 0 10px #000;
+  z-index:0; animation: winGlow 2s infinite alternate; pointer-events:none;
 }
-@keyframes winGlow {
-  0% { filter: brightness(1); }
-  50% { filter: brightness(1.3); }
-  100% { filter: brightness(1); }
+#winScreen.active { pointer-events:auto; }
+
+@keyframes winGlow {0%{filter:brightness(1);}50%{filter:brightness(1.3);}100%{filter:brightness(1);}}
+
+#devPanel { position:absolute; top:10px; right:10px; background: rgba(0,0,0,0.5); padding:10px; border-radius:8px; z-index:10; color:#fff; font-size:0.9rem; }
+
+@media screen and (max-width: 480px) {
+  :root { --card-width:50px; --card-height:75px; }
+  #titleFrame { font-size:0.9rem; }
+  button { font-size:0.9rem; padding:6px 10px; }
 }
