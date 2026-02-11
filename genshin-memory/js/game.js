@@ -10,6 +10,7 @@ let winCount = 0;
 // AI思考時間（ミリ秒）
 const aiDelay = { easy: 1500, medium: 1000, hard: 700 };
 
+// ---------------- GAME START ----------------
 function startGame() {
   gridSize = parseInt(document.getElementById('boardSize').value);
   document.documentElement.style.setProperty('--grid-size', gridSize);
@@ -32,6 +33,7 @@ function stopGame() {
   document.getElementById('titleScreen').classList.add('active');
 }
 
+// ---------------- INIT BOARD ----------------
 function initBoard(){
   const boardEl = document.getElementById('board');
   boardEl.innerHTML = '';
@@ -97,6 +99,7 @@ function aiTurn(){
 function checkMatch(player){
   const [c1,c2] = selected;
   if(c1.dataset.icon === c2.dataset.icon){
+    // ペア成功
     c1.classList.add('matched');
     c2.classList.add('matched');
     pairsFound[player]++;
@@ -104,8 +107,9 @@ function checkMatch(player){
     selected = [];
     updateScore();
 
-    if(isGameOver()) showWin();
-    else {
+    if(isGameOver()) {
+      showWin();
+    } else {
       // 揃った場合は同じターンで続ける
       if(player==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
     }
@@ -138,28 +142,30 @@ function removeFromMemory(icon, cards){
 
 // ---------------- SMART AI CARD PICK ----------------
 function pickSmartAICards(available){
-  // hard: 完全優先で揃えられるペア
-  if(aiLevel==='hard'){
-    for(let icon in aiMemory){
-      if(aiMemory[icon].length>=2){
-        let knownCards = aiMemory[icon].filter(c=>available.includes(c));
-        if(knownCards.length>=2) return [knownCards[0], knownCards[1]];
-      }
-    }
+  // 1. 覚えたカードで揃えられるペアをランダムに選ぶ
+  let possiblePairs = [];
+  for(let icon in aiMemory){
+    let knownCards = aiMemory[icon].filter(c=>available.includes(c));
+    if(knownCards.length>=2) possiblePairs.push([knownCards[0], knownCards[1]]);
+  }
+  if(possiblePairs.length>0){
+    return possiblePairs[Math.floor(Math.random()*possiblePairs.length)];
   }
 
-  // medium: 覚えたカードから1枚推測
-  if(aiLevel==='medium' || aiLevel==='hard'){
-    for(let icon in aiMemory){
-      if(aiMemory[icon].length===1){
-        let known = aiMemory[icon][0];
-        let random = available.find(c=>c!==known) || available[0];
-        return [known, random];
-      }
-    }
+  // 2. 覚えたカード1枚＋ランダム
+  let singleOptions = [];
+  for(let icon in aiMemory){
+    let knownCards = aiMemory[icon].filter(c=>available.includes(c));
+    if(knownCards.length===1) singleOptions.push(knownCards[0]);
+  }
+  if(singleOptions.length>0){
+    let known = singleOptions[Math.floor(Math.random()*singleOptions.length)];
+    let randomCandidates = available.filter(c=>c!==known);
+    let randomCard = randomCandidates[Math.floor(Math.random()*randomCandidates.length)];
+    return [known, randomCard];
   }
 
-  // easy: 完全ランダム
+  // 3. 完全ランダム
   let idx1=Math.floor(Math.random()*available.length);
   let idx2=Math.floor(Math.random()*available.length);
   if(idx1===idx2) idx2=(idx2+1)%available.length;
