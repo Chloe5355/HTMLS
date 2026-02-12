@@ -1,178 +1,174 @@
-let cards = [];
-let flipped = [];
-let lockBoard = false;
-let currentTurn = "player";
-let pairsFound = { player: 0, ai: 0 };
-let winCount = 0;
-let totalGames = 0;
-let gridSize = 8;
+let cards=[],flipped=[],lock=false;
+let turn="player";
+let score={player:0,ai:0};
+let gridSize=8;
+let aiLevel="normal";
+let aiMemory={};
+let wins=0,total=0;
 
-window.onload = function(){
-  winCount = parseInt(localStorage.getItem("winCount")) || 0;
-  totalGames = parseInt(localStorage.getItem("totalGames")) || 0;
+window.onload=()=>{
+  wins=parseInt(localStorage.getItem("wins"))||0;
+  total=parseInt(localStorage.getItem("total"))||0;
 };
 
 function startGame(){
-  gridSize = parseInt(document.getElementById("boardSize").value);
-  document.documentElement.style.setProperty("--grid-size", gridSize);
+  gridSize=parseInt(boardSize.value);
+  aiLevel=aiLevelSelect.value;
+  document.documentElement.style.setProperty("--grid-size",gridSize);
+  board.style.gridTemplateColumns=`repeat(${gridSize},1fr)`;
 
-  document.getElementById("titleScreen").classList.remove("active");
-  document.getElementById("gameScreen").classList.add("active");
-
-  initBoard();
+  showScreen("gameScreen");
+  init();
 }
 
-function initBoard(){
-  const board = document.getElementById("board");
-  board.innerHTML = "";
-  cards = [];
-  flipped = [];
-  pairsFound = { player:0, ai:0 };
-  currentTurn = "player";
+function init(){
+  board.innerHTML="";
+  cards=[];flipped=[];lock=false;
+  score={player:0,ai:0};
+  turn="player";
+  aiMemory={};
 
-  let total = gridSize * gridSize;
-  let symbols = [];
-  for(let i=0;i<total/2;i++){
-    symbols.push(i);
-    symbols.push(i);
-  }
-  symbols.sort(()=>Math.random()-0.5);
+  let totalCards=gridSize*gridSize;
+  let arr=[];
+  for(let i=0;i<totalCards/2;i++){arr.push(i,i);}
+  arr.sort(()=>Math.random()-0.5);
 
-  symbols.forEach((symbol,index)=>{
-    const card = document.createElement("div");
-    card.classList.add("card");
-    card.dataset.symbol = symbol;
-    card.textContent = "？";
-    card.onclick = ()=>flipCard(card);
-    board.appendChild(card);
-    cards.push(card);
+  arr.forEach((v,i)=>{
+    let c=document.createElement("div");
+    c.className="card";
+    c.dataset.value=v;
+    c.onclick=()=>playerFlip(c);
+    board.appendChild(c);
+    cards.push(c);
   });
 
-  updateScore();
+  updateUI();
 }
 
-function flipCard(card){
-  if(lockBoard || currentTurn!=="player") return;
-  if(flipped.length===2) return;
-  if(card.classList.contains("matched")) return;
-  if(flipped.includes(card)) return;
+function playerFlip(card){
+  if(lock||turn!=="player")return;
+  if(flipped.length===2||card.classList.contains("matched"))return;
+  reveal(card);
+  if(flipped.length===2)check();
+}
 
-  card.textContent = card.dataset.symbol;
+function reveal(card){
+  card.textContent=card.dataset.value;
   flipped.push(card);
 
-  if(flipped.length===2){
-    checkMatch();
-  }
+  if(!aiMemory[card.dataset.value])
+    aiMemory[card.dataset.value]=[];
+  if(!aiMemory[card.dataset.value].includes(card))
+    aiMemory[card.dataset.value].push(card);
 }
 
-function checkMatch(){
-  lockBoard = true;
+function check(){
+  lock=true;
+  let [a,b]=flipped;
 
-  if(flipped[0].dataset.symbol === flipped[1].dataset.symbol){
-    flipped.forEach(c=>c.classList.add("matched"));
-    pairsFound[currentTurn]++;
-    flipped = [];
-    lockBoard = false;
-    updateScore();
-    checkGameEnd();
-  } else {
+  if(a.dataset.value===b.dataset.value){
+    a.classList.add("matched");
+    b.classList.add("matched");
+    score[turn]++;
+    delete aiMemory[a.dataset.value];
+    flipped=[];
+    lock=false;
+    updateUI();
+    if(isEnd())finish();
+  }else{
     setTimeout(()=>{
-      flipped.forEach(c=>c.textContent="？");
-      flipped = [];
-      currentTurn = currentTurn==="player"?"ai":"player";
-      updateScore();
-      lockBoard = false;
-      if(currentTurn==="ai") aiTurn();
-    },800);
+      a.textContent="";
+      b.textContent="";
+      flipped=[];
+      turn=turn==="player"?"ai":"player";
+      updateUI();
+      lock=false;
+      if(turn==="ai")aiTurn();
+    },1000);
   }
 }
 
 function aiTurn(){
   setTimeout(()=>{
-    let available = cards.filter(c=>!c.classList.contains("matched"));
-    let first = available[Math.floor(Math.random()*available.length)];
-    flipAI(first);
+    let pair=findPair();
+    let first,second;
+
+    if(aiLevel==="easy"||!pair){
+      [first,second]=randomPick();
+    }else{
+      [first,second]=pair;
+    }
+
+    reveal(first);
     setTimeout(()=>{
-      available = cards.filter(c=>!c.classList.contains("matched") && c!==first);
-      let second = available[Math.floor(Math.random()*available.length)];
-      flipAI(second);
-      checkMatch();
-    },600);
-  },800);
+      reveal(second);
+      check();
+    },800);
+  },1000);
 }
 
-function flipAI(card){
-  card.textContent = card.dataset.symbol;
-  flipped.push(card);
+function randomPick(){
+  let avail=cards.filter(c=>!c.classList.contains("matched"));
+  let a=avail[Math.floor(Math.random()*avail.length)];
+  let b;
+  do{b=avail[Math.floor(Math.random()*avail.length)];}
+  while(a===b);
+  return[a,b];
 }
 
-function updateScore(){
-  document.getElementById("currentTurn").textContent =
-    currentTurn==="player"?"あなた":"AI";
-
-  document.getElementById("playerScore").textContent = pairsFound.player;
-  document.getElementById("aiScore").textContent = pairsFound.ai;
-}
-
-function checkGameEnd(){
-  if(pairsFound.player + pairsFound.ai === (gridSize*gridSize)/2){
-    showWin();
+function findPair(){
+  if(aiLevel==="easy")return null;
+  for(let k in aiMemory){
+    let v=aiMemory[k].filter(c=>!c.classList.contains("matched"));
+    if(v.length>=2)return[v[0],v[1]];
   }
+  return null;
 }
 
-function showWin(){
-  document.getElementById("gameScreen").classList.remove("active");
-  document.getElementById("winScreen").classList.add("active");
+function updateUI(){
+  turnDisplay.textContent=
+    turn==="player"?"あなたのターン":"AIのターン";
+  playerScore.textContent=score.player;
+  aiScore.textContent=score.ai;
+}
 
-  document.getElementById("playerPairs").textContent = pairsFound.player;
-  document.getElementById("aiPairs").textContent = pairsFound.ai;
+function isEnd(){
+  return score.player+score.ai===(gridSize*gridSize)/2;
+}
 
-  totalGames++;
-
-  if(pairsFound.player > pairsFound.ai){
-    document.getElementById("winner").textContent="あなた";
-    winCount++;
-  } else if(pairsFound.player < pairsFound.ai){
-    document.getElementById("winner").textContent="AI";
-  } else {
-    document.getElementById("winner").textContent="引き分け";
+function finish(){
+  total++;
+  if(score.player>score.ai){
+    wins++;
+    winnerText.textContent="あなたの勝ち！";
+  }else if(score.player<score.ai){
+    winnerText.textContent="AIの勝ち！";
+  }else{
+    winnerText.textContent="引き分け";
   }
 
-  localStorage.setItem("winCount", winCount);
-  localStorage.setItem("totalGames", totalGames);
+  localStorage.setItem("wins",wins);
+  localStorage.setItem("total",total);
 
-  document.getElementById("winCount").textContent = winCount;
-  document.getElementById("totalGames").textContent = totalGames;
+  finalPlayer.textContent=score.player;
+  finalAI.textContent=score.ai;
+  winCount.textContent=wins;
+  totalGames.textContent=total;
+  winRate.textContent=Math.round((wins/total)*100)||0;
 
-  let rate = totalGames===0?0:
-    Math.round((winCount/totalGames)*100);
-
-  document.getElementById("winRate").textContent = rate;
+  showScreen("resultScreen");
 }
 
-function nextGame(){
-  document.getElementById("winScreen").classList.remove("active");
-  document.getElementById("gameScreen").classList.add("active");
-  initBoard();
-}
-
-function stopGame(){
-  document.getElementById("winScreen").classList.remove("active");
-  document.getElementById("titleScreen").classList.add("active");
-}
-
+function restart(){showScreen("gameScreen");init();}
+function goTitle(){showScreen("titleScreen");}
 function resetData(){
-  if(!confirm("本当にデータをリセットしますか？")) return;
+  localStorage.clear();
+  wins=0;total=0;
+  alert("データリセット完了");
+}
 
-  localStorage.removeItem("winCount");
-  localStorage.removeItem("totalGames");
-
-  winCount=0;
-  totalGames=0;
-
-  document.getElementById("winCount").textContent=0;
-  document.getElementById("totalGames").textContent=0;
-  document.getElementById("winRate").textContent=0;
-
-  alert("データをリセットしました");
+function showScreen(id){
+  document.querySelectorAll(".screen")
+    .forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
