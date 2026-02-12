@@ -3,77 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>真剣衰弱</title>
+<title>AI真剣衰弱</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <!-- タイトル画面 -->
 <div id="titleScreen" class="screen active">
-  <h1>真剣衰弱</h1>
-  <img id="flag" class="flag" src="https://chloe5355.github.io/HTMLS/img/Columbina.png" alt="旗">
+  <h1>AI真剣衰弱</h1>
 
-  <label for="boardSize">盤面サイズ:</label>
+  <label>盤面サイズ</label>
   <select id="boardSize">
     <option value="4">4x4</option>
     <option value="8" selected>8x8</option>
-    <option value="16">16x16</option>
   </select>
-  <br>
 
-  <label for="aiDifficulty">AI難易度:</label>
-  <select id="aiDifficulty">
-    <option value="easy">弱</option>
-    <option value="medium">中</option>
-    <option value="hard">強</option>
-  </select>
-  <br>
-
-  <button onclick="startGame()">▶ ゲーム開始</button>
-  <button onclick="showRules()">📖 ルール</button>
-
-  <!-- 実績 -->
-  <div id="achievements">
-    <h3>📜 実績</h3>
-    <ul id="achievementList">
-      <li>勝利回数: <span id="winCount">0</span></li>
-    </ul>
-  </div>
-</div>
-
-<!-- ルールモーダル -->
-<div id="rulesModal" class="modal">
-  <div class="modalContent">
-    <h2>ルール</h2>
-    <p>同じ数のカードを揃える真剣衰弱ゲームです。AIと交互にめくり、揃えた枚数が多い方が勝ちです。</p>
-    <button onclick="closeRules()">閉じる</button>
-  </div>
+  <button onclick="startGame()">スタート</button>
 </div>
 
 <!-- ゲーム画面 -->
 <div id="gameScreen" class="screen">
-  <div>
-    <button onclick="stopGame()">⏹ ゲーム終了</button>
+  <div class="top-bar">
+    <div class="turn-display">
+      <span id="currentTurn">あなた</span>のターン
+    </div>
+    <div class="score-display">
+      🧑 <span id="playerScore">0</span> |
+      🤖 <span id="aiScore">0</span>
+    </div>
   </div>
-
-  <!-- ターン＆スコア表示 -->
-  <div id="status">
-    <p>現在のターン: <span id="currentTurn">あなた</span></p>
-    <p>あなた: <span id="playerScore">0</span> 枚</p>
-    <p>AI: <span id="aiScore">0</span> 枚</p>
-  </div>
-
   <div id="board" class="board"></div>
 </div>
 
-<!-- 結果画面 -->
+<!-- 勝敗画面 -->
 <div id="winScreen" class="screen">
-  <h1>🏆 結果</h1>
-  <p>あなた: <span id="playerPairs">0</span> 枚</p>
-  <p>AI: <span id="aiPairs">0</span> 枚</p>
-  <p>勝者: <span id="winner">なし</span></p>
-  <button onclick="nextGame()">次のゲーム</button>
-  <button onclick="stopGame()">タイトルに戻る</button>
+  <h2><span id="winner"></span>の勝ち！</h2>
+  <p>あなた: <span id="playerPairs"></span></p>
+  <p>AI: <span id="aiPairs"></span></p>
+  <p>通算勝利数: <span id="winCount">0</span></p>
+  <p>総試合数: <span id="totalGames">0</span></p>
+  <p>勝率: <span id="winRate">0</span>%</p>
+  <button onclick="nextGame()">もう一度</button>
+  <button onclick="stopGame()">タイトルへ</button>
+  <button onclick="resetData()" class="reset-btn">データリセット</button>
 </div>
 
 <script src="js/game.js"></script>
