@@ -1,174 +1,275 @@
-let cards=[],flipped=[],lock=false;
-let turn="player";
-let score={player:0,ai:0};
-let gridSize=8;
-let aiLevel="normal";
-let aiMemory={};
-let wins=0,total=0;
+// ====== 状態管理 ======
+let cards = [];
+let flipped = [];
+let lockBoard = false;
+let currentTurn = "player";
+let score = { player: 0, ai: 0 };
+let gridSize = 8;
+let aiLevel = "normal";
+let aiMemory = {};
 
-window.onload=()=>{
-  wins=parseInt(localStorage.getItem("wins"))||0;
-  total=parseInt(localStorage.getItem("total"))||0;
+let winCount = 0;
+let totalGames = 0;
+
+// ====== 初期ロード ======
+window.onload = () => {
+  winCount = parseInt(localStorage.getItem("wins")) || 0;
+  totalGames = parseInt(localStorage.getItem("games")) || 0;
 };
 
-function startGame(){
-  gridSize=parseInt(boardSize.value);
-  aiLevel=aiLevelSelect.value;
-  document.documentElement.style.setProperty("--grid-size",gridSize);
-  board.style.gridTemplateColumns=`repeat(${gridSize},1fr)`;
+// ====== ゲーム開始 ======
+function startGame() {
+  gridSize = parseInt(document.getElementById("boardSize").value);
+  aiLevel = document.getElementById("aiLevel").value;
+
+  document.getElementById("board").style.gridTemplateColumns =
+    `repeat(${gridSize}, 1fr)`;
 
   showScreen("gameScreen");
-  init();
+  initBoard();
 }
 
-function init(){
-  board.innerHTML="";
-  cards=[];flipped=[];lock=false;
-  score={player:0,ai:0};
-  turn="player";
-  aiMemory={};
+// ====== 盤面生成 ======
+function initBoard() {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
 
-  let totalCards=gridSize*gridSize;
-  let arr=[];
-  for(let i=0;i<totalCards/2;i++){arr.push(i,i);}
-  arr.sort(()=>Math.random()-0.5);
+  cards = [];
+  flipped = [];
+  lockBoard = false;
+  currentTurn = "player";
+  score = { player: 0, ai: 0 };
+  aiMemory = {};
 
-  arr.forEach((v,i)=>{
-    let c=document.createElement("div");
-    c.className="card";
-    c.dataset.value=v;
-    c.onclick=()=>playerFlip(c);
-    board.appendChild(c);
-    cards.push(c);
+  const total = gridSize * gridSize;
+  let values = [];
+
+  for (let i = 0; i < total / 2; i++) {
+    values.push(i, i);
+  }
+
+  values.sort(() => Math.random() - 0.5);
+
+  values.forEach((val, index) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.value = val;
+    card.dataset.index = index;
+    card.textContent = ""; // 「？」なし
+
+    card.onclick = () => playerFlip(card);
+
+    board.appendChild(card);
+    cards.push(card);
   });
 
   updateUI();
 }
 
-function playerFlip(card){
-  if(lock||turn!=="player")return;
-  if(flipped.length===2||card.classList.contains("matched"))return;
+// ====== プレイヤー処理 ======
+function playerFlip(card) {
+  if (lockBoard) return;
+  if (currentTurn !== "player") return;
+  if (flipped.length >= 2) return;
+  if (card.classList.contains("matched")) return;
+  if (flipped.includes(card)) return;
+
   reveal(card);
-  if(flipped.length===2)check();
-}
 
-function reveal(card){
-  card.textContent=card.dataset.value;
-  flipped.push(card);
-
-  if(!aiMemory[card.dataset.value])
-    aiMemory[card.dataset.value]=[];
-  if(!aiMemory[card.dataset.value].includes(card))
-    aiMemory[card.dataset.value].push(card);
-}
-
-function check(){
-  lock=true;
-  let [a,b]=flipped;
-
-  if(a.dataset.value===b.dataset.value){
-    a.classList.add("matched");
-    b.classList.add("matched");
-    score[turn]++;
-    delete aiMemory[a.dataset.value];
-    flipped=[];
-    lock=false;
-    updateUI();
-    if(isEnd())finish();
-  }else{
-    setTimeout(()=>{
-      a.textContent="";
-      b.textContent="";
-      flipped=[];
-      turn=turn==="player"?"ai":"player";
-      updateUI();
-      lock=false;
-      if(turn==="ai")aiTurn();
-    },1000);
+  if (flipped.length === 2) {
+    checkMatch();
   }
 }
 
-function aiTurn(){
-  setTimeout(()=>{
-    let pair=findPair();
-    let first,second;
+// ====== 共通：カード表示 ======
+function reveal(card) {
+  card.textContent = card.dataset.value;
+  flipped.push(card);
 
-    if(aiLevel==="easy"||!pair){
-      [first,second]=randomPick();
-    }else{
-      [first,second]=pair;
+  // AI記憶（レベルnormal以上）
+  if (aiLevel !== "easy") {
+    if (!aiMemory[card.dataset.value]) {
+      aiMemory[card.dataset.value] = [];
+    }
+    if (!aiMemory[card.dataset.value].includes(card)) {
+      aiMemory[card.dataset.value].push(card);
+    }
+  }
+}
+
+// ====== 判定処理 ======
+function checkMatch() {
+  lockBoard = true;
+
+  const [a, b] = flipped;
+
+  if (a.dataset.value === b.dataset.value) {
+    // 揃った
+    a.classList.add("matched");
+    b.classList.add("matched");
+
+    score[currentTurn]++;
+
+    delete aiMemory[a.dataset.value];
+
+    flipped = [];
+    lockBoard = false;
+
+    updateUI();
+
+    if (isGameEnd()) finishGame();
+    else if (currentTurn === "ai") {
+      // AIは揃ったら続行
+      setTimeout(aiTurn, 1000);
     }
 
-    reveal(first);
-    setTimeout(()=>{
-      reveal(second);
-      check();
-    },800);
-  },1000);
+  } else {
+    // 外れ
+    setTimeout(() => {
+      a.textContent = "";
+      b.textContent = "";
+
+      flipped = [];
+      currentTurn = currentTurn === "player" ? "ai" : "player";
+      updateUI();
+
+      lockBoard = false;
+
+      if (currentTurn === "ai") {
+        setTimeout(aiTurn, 1000);
+      }
+    }, 1000); // 表示1秒
+  }
 }
 
-function randomPick(){
-  let avail=cards.filter(c=>!c.classList.contains("matched"));
-  let a=avail[Math.floor(Math.random()*avail.length)];
+// ====== AI処理 ======
+function aiTurn() {
+  if (lockBoard) return;
+
+  let first, second;
+
+  // HARD / NORMAL は既知ペア優先
+  if (aiLevel !== "easy") {
+    const known = findKnownPair();
+    if (known) {
+      [first, second] = known;
+    }
+  }
+
+  // 見つからなければランダム
+  if (!first) {
+    [first, second] = randomPick();
+  }
+
+  reveal(first);
+
+  setTimeout(() => {
+    reveal(second);
+    checkMatch();
+  }, 800);
+}
+
+// ====== ランダム選択 ======
+function randomPick() {
+  const available = cards.filter(c =>
+    !c.classList.contains("matched") &&
+    !flipped.includes(c)
+  );
+
+  const a = available[Math.floor(Math.random() * available.length)];
   let b;
-  do{b=avail[Math.floor(Math.random()*avail.length)];}
-  while(a===b);
-  return[a,b];
+
+  do {
+    b = available[Math.floor(Math.random() * available.length)];
+  } while (a === b);
+
+  return [a, b];
 }
 
-function findPair(){
-  if(aiLevel==="easy")return null;
-  for(let k in aiMemory){
-    let v=aiMemory[k].filter(c=>!c.classList.contains("matched"));
-    if(v.length>=2)return[v[0],v[1]];
+// ====== 記憶ペア探索 ======
+function findKnownPair() {
+  for (let key in aiMemory) {
+    const valid = aiMemory[key].filter(c =>
+      !c.classList.contains("matched")
+    );
+    if (valid.length >= 2) {
+      return [valid[0], valid[1]];
+    }
   }
   return null;
 }
 
-function updateUI(){
-  turnDisplay.textContent=
-    turn==="player"?"あなたのターン":"AIのターン";
-  playerScore.textContent=score.player;
-  aiScore.textContent=score.ai;
+// ====== UI更新 ======
+function updateUI() {
+  document.getElementById("turnText").textContent =
+    currentTurn === "player" ? "あなたのターン" : "AIのターン";
+
+  document.getElementById("pScore").textContent = score.player;
+  document.getElementById("aScore").textContent = score.ai;
 }
 
-function isEnd(){
-  return score.player+score.ai===(gridSize*gridSize)/2;
+// ====== 終了判定 ======
+function isGameEnd() {
+  return score.player + score.ai === (gridSize * gridSize) / 2;
 }
 
-function finish(){
-  total++;
-  if(score.player>score.ai){
-    wins++;
-    winnerText.textContent="あなたの勝ち！";
-  }else if(score.player<score.ai){
-    winnerText.textContent="AIの勝ち！";
-  }else{
-    winnerText.textContent="引き分け";
+// ====== 結果処理 ======
+function finishGame() {
+  totalGames++;
+
+  let winnerText = "引き分け";
+
+  if (score.player > score.ai) {
+    winnerText = "あなたの勝ち！";
+    winCount++;
+  } else if (score.player < score.ai) {
+    winnerText = "AIの勝ち！";
   }
 
-  localStorage.setItem("wins",wins);
-  localStorage.setItem("total",total);
+  localStorage.setItem("wins", winCount);
+  localStorage.setItem("games", totalGames);
 
-  finalPlayer.textContent=score.player;
-  finalAI.textContent=score.ai;
-  winCount.textContent=wins;
-  totalGames.textContent=total;
-  winRate.textContent=Math.round((wins/total)*100)||0;
+  document.getElementById("winner").textContent = winnerText;
+  document.getElementById("finalP").textContent = score.player;
+  document.getElementById("finalA").textContent = score.ai;
+  document.getElementById("wins").textContent = winCount;
+  document.getElementById("games").textContent = totalGames;
+
+  const rate = totalGames === 0
+    ? 0
+    : Math.round((winCount / totalGames) * 100);
+
+  document.getElementById("rate").textContent = rate;
 
   showScreen("resultScreen");
 }
 
-function restart(){showScreen("gameScreen");init();}
-function goTitle(){showScreen("titleScreen");}
-function resetData(){
-  localStorage.clear();
-  wins=0;total=0;
-  alert("データリセット完了");
+// ====== 画面制御 ======
+function restart() {
+  showScreen("gameScreen");
+  initBoard();
 }
 
-function showScreen(id){
+function toTitle() {
+  showScreen("titleScreen");
+}
+
+function resetData() {
+  if (!confirm("データをリセットしますか？")) return;
+
+  localStorage.removeItem("wins");
+  localStorage.removeItem("games");
+
+  winCount = 0;
+  totalGames = 0;
+
+  alert("リセットしました");
+}
+
+// ====== 画面切替 ======
+function showScreen(id) {
   document.querySelectorAll(".screen")
-    .forEach(s=>s.classList.remove("active"));
+    .forEach(s => s.classList.remove("active"));
+
   document.getElementById(id).classList.add("active");
 }
