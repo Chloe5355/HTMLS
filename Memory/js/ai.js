@@ -19,7 +19,7 @@ function stopAIThinking() {
 }
 
 function aiTurn(){
-  if(currentTurn !== 'ai') return;
+  currentTurn = 'ai'; // ←追加: ターン固定を修正
   lockBoard = true;
   startAIThinking(); 
 
@@ -48,32 +48,4 @@ function aiTurn(){
     }, delay);
 
   }, aiDelay[aiLevel]);
-}
-
-function pickSmartAICards(available){
-  let possiblePairs = [];
-  for(let icon in aiMemory){
-    let knownCards = aiMemory[icon].filter(c=>available.includes(c));
-    if(knownCards.length>=2) possiblePairs.push([knownCards[0], knownCards[1]]);
-  }
-  if(possiblePairs.length>0){
-    return possiblePairs[Math.floor(Math.random()*possiblePairs.length)];
-  }
-
-  let singleOptions = [];
-  for(let icon in aiMemory){
-    let knownCards = aiMemory[icon].filter(c=>available.includes(c));
-    if(knownCards.length===1) singleOptions.push(knownCards[0]);
-  }
-  if(singleOptions.length>0){
-    let known = singleOptions[Math.floor(Math.random()*singleOptions.length)];
-    let randomCandidates = available.filter(c=>c!==known);
-    let randomCard = randomCandidates[Math.floor(Math.random()*randomCandidates.length)];
-    return [known, randomCard];
-  }
-
-  let idx1=Math.floor(Math.random()*available.length);
-  let idx2=Math.floor(Math.random()*available.length);
-  if(idx1===idx2) idx2=(idx2+1)%available.length;
-  return [available[idx1], available[idx2]];
 }
