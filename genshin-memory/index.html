@@ -2,57 +2,66 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>メンテナンス中</title>
-<style>
-body {
-    margin: 0;
-    padding: 0;
-    font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-    background: #2c3e50;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    text-align: center;
-}
-
-.container {
-    padding: 40px;
-}
-
-h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
-}
-
-p {
-    font-size: 1.2em;
-    opacity: 0.9;
-}
-
-.spinner {
-    margin: 25px auto;
-    width: 50px;
-    height: 50px;
-    border: 6px solid rgba(255, 255, 255, 0.3);
-    border-top: 6px solid white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI真剣衰弱</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>メンテナンス中</h1>
-        <div class="spinner"></div>
-        <p>ごぺんねぇ</p>
+
+<!-- タイトル画面 -->
+<div id="titleScreen" class="screen active">
+  <h1>AI真剣衰弱</h1>
+
+  <img 
+    src="https://chloe5355.github.io/HTMLS/img/Columbina.png"
+    class="title-image"
+    draggable="false"
+  >
+
+  <label>盤面サイズ</label>
+  <select id="boardSize">
+    <option value="4">4×4</option>
+    <option value="8" selected>8×8</option>
+    <option value="16">16×16</option>
+  </select>
+
+  <label>AIレベル</label>
+  <select id="aiLevel">
+    <option value="easy">EASY</option>
+    <option value="normal" selected>NORMAL</option>
+    <option value="hard">HARD</option>
+  </select>
+
+  <button onclick="startGame()">スタート</button>
+</div>
+
+<!-- ゲーム画面 -->
+<div id="gameScreen" class="screen">
+  <div class="top-bar">
+    <div id="turnDisplay">あなたのターン</div>
+    <div>
+      🧑 <span id="playerScore">0</span>　
+      🤖 <span id="aiScore">0</span>
     </div>
+  </div>
+  <div id="board" class="board"></div>
+</div>
+
+<!-- 結果画面 -->
+<div id="resultScreen" class="screen">
+  <h2 id="winnerText"></h2>
+  <p>あなた: <span id="finalPlayer"></span></p>
+  <p>AI: <span id="finalAI"></span></p>
+
+  <p>通算勝利: <span id="winCount">0</span></p>
+  <p>総試合: <span id="totalGames">0</span></p>
+  <p>勝率: <span id="winRate">0</span>%</p>
+
+  <button onclick="restart()">もう一度</button>
+  <button onclick="goTitle()">タイトルへ</button>
+  <button onclick="resetData()">データリセット</button>
+</div>
+
+<script src="js/game.js"></script>
 </body>
 </html>
