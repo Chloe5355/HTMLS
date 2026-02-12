@@ -1,0 +1,16 @@
+/* buttons.css */
+button {
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
+  border: none;
+  padding: 10px 16px;
+  margin: 4px;
+  font-size: 1.1em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
