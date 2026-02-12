@@ -1,16 +1,4 @@
 // match.js
-function rememberCard(card){
-  if(!aiMemory[card.dataset.icon]) aiMemory[card.dataset.icon]=[];
-  if(!aiMemory[card.dataset.icon].includes(card)) aiMemory[card.dataset.icon].push(card);
-}
-
-function removeFromMemory(icon, cards){
-  if(aiMemory[icon]){
-    aiMemory[icon] = aiMemory[icon].filter(c=>!cards.includes(c));
-    if(aiMemory[icon].length===0) delete aiMemory[icon];
-  }
-}
-
 function checkMatch(player){
   const [c1,c2] = selected;
   if(c1.dataset.icon === c2.dataset.icon){
@@ -33,8 +21,10 @@ function checkMatch(player){
 
   } else {
     setTimeout(()=>{
-      c1.textContent=''; c2.textContent='';
+      c1.textContent=''; 
+      c2.textContent='';
       selected = [];
+      // ターン切替を明示
       currentTurn = (player==='player') ? 'ai' : 'player';
       updateScore();
       if(currentTurn==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
