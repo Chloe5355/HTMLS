@@ -1,17 +1,13 @@
-let currentTurn = 'player';
-let aiLevel = 'medium';
-let board = [];
-let selected = [];
-let pairsFound = { player:0, ai:0 };
-let aiMemory = {};
-let gridSize = 8;
-let winCount = 0;
-let lockBoard = false;
+// ログ関数（スマホ用）
+function log(msg){
+    console.log(msg);
+    const logEl = document.getElementById('log');
+    if(logEl) logEl.innerHTML += msg + '<br>';
+}
 
-const aiDelay = { easy: 1500, medium: 1000, hard: 700 };
-const aiExtraDelay = { success: 600, fail: 1200 };
-
-function startGame() {
+// ゲーム開始関数
+function startGame(){
+    log('startGame が呼ばれました');
     gridSize = parseInt(document.getElementById('boardSize').value);
     document.documentElement.style.setProperty('--grid-size', gridSize);
 
@@ -30,29 +26,11 @@ function startGame() {
     if(currentTurn==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
 }
 
-function stopGame() {
-    document.getElementById('gameScreen').classList.remove('active');
-    document.getElementById('winScreen').classList.remove('active');
-    document.getElementById('titleScreen').classList.add('active');
-}
-
-function nextGame() {
-    document.getElementById('winScreen').classList.remove('active');
-    startGame();
-}
-
-function showRules() { document.getElementById('rulesModal').style.display='flex'; }
-function closeRules() { document.getElementById('rulesModal').style.display='none'; }
-
-function updateScore() {
-    document.getElementById('currentTurn').textContent = (currentTurn==='player')?'あなた':'AI';
-    document.getElementById('playerScore').textContent = pairsFound.player;
-    document.getElementById('aiScore').textContent = pairsFound.ai;
-}
+// 他の関数も同様に log() を必要に応じて入れられます
 
 // ---------------------------------------------------
-// window で公開（HTMLのボタンやカードから呼び出せる）
-document.addEventListener('DOMContentLoaded', () => {
+// DOM読み込み後に関数を window に公開
+document.addEventListener('DOMContentLoaded', ()=>{
     window.startGame = startGame;
     window.stopGame = stopGame;
     window.nextGame = nextGame;
@@ -60,4 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeRules = closeRules;
     window.playerTurn = playerTurn;
     window.aiTurn = aiTurn;
+
+    log('window に関数を公開しました');
 });
