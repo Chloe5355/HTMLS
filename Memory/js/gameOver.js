@@ -1,8 +1,4 @@
 // gameOver.js
-function isGameOver(){
-  return board.every(c=>c.classList.contains('matched'));
-}
-
 function showWin(){
   board.forEach(card => {
     if(!card.classList.contains('matched')) return;
@@ -21,19 +17,15 @@ function showWin(){
 
     if(pairsFound.player > pairsFound.ai){
       document.getElementById('winner').textContent = 'あなた';
-      winCount++;
-      document.getElementById('winCount').textContent = winCount;
+      updateAchievements('あなた'); // ←追加
     } else if(pairsFound.player < pairsFound.ai){
       document.getElementById('winner').textContent = 'AI';
+      updateAchievements('AI'); // ←追加
     } else {
       document.getElementById('winner').textContent = '引き分け';
+      updateAchievements('draw'); // ←追加
     }
 
     board.forEach(c => c.classList.remove('fly', 'matched'));
   }, 1000);
-}
-
-function nextGame(){
-  document.getElementById('winScreen').classList.remove('active');
-  startGame();
 }
