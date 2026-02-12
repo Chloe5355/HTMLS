@@ -18,6 +18,7 @@ window.nextGame = nextGame;
 window.showRules = showRules;
 window.closeRules = closeRules;
 window.playerTurn = playerTurn;
+window.aiTurn = aiTurn;
 
 function startGame() {
   gridSize = parseInt(document.getElementById('boardSize').value);
