@@ -33,6 +33,16 @@ h1 { margin-bottom:10px; }
 
 #achievements { text-align:left; display:block; }
 
+/* ---------------- FLAG 追加 ---------------- */
+.flag {
+  width:128px;
+  max-width:20vw;
+  border-radius:50%;
+  border:1.5px solid var(--card-border-color);
+  margin:20px auto;
+  display:block;
+}
+
 /* ---------------- BOARD ---------------- */
 .board {
   display:grid;
@@ -78,24 +88,20 @@ h1 { margin-bottom:10px; }
   border:1px solid var(--card-border-color);
 }
 
-/* 裏面（最初見える黒） */
 .card-front {
   background: var(--card-front-color);
 }
 
-/* 表面（アイコン面） */
 .card-back {
   background: var(--card-back-color);
   transform: rotateY(180deg);
 }
 
-/* 揃ったカード */
 .card.matched .card-inner {
   transform: rotateY(180deg);
   animation: matchPop 0.4s ease;
 }
 
-/* 揃った時ポップ */
 @keyframes matchPop {
   0%   { transform: rotateY(180deg) scale(1); }
   50%  { transform: rotateY(180deg) scale(1.15); }
@@ -167,6 +173,11 @@ button:active {
 @media(max-width:600px){
 
   body { font-size:16px; }
+
+  .flag {
+    width:80px;
+    max-width:30vw;
+  }
 
   .card-front,
   .card-back {
