@@ -1,16 +1,16 @@
 :root {
   --bg-color: #ffffff;
 
-  --card-front-color: #000000;   /* 裏面（黒） */
-  --card-back-color: #ffffff;    /* 表面（白） */
+  --card-front-color: #ffffff;   /* ← 白に変更 */
+  --card-back-color: #ffffff;
   --card-border-color: #000000;
 
   --button-bg-color: #ffffff;
   --button-text-color: #000000;
   --button-border-color: #000000;
 
-  --status-bg: #000000;
-  --status-text: #ffffff;
+  --status-bg: #ffffff;          /* ← 白に変更 */
+  --status-text: #000000;        /* ← 黒に変更 */
 
   --grid-size: 8;
   --text-color: #000000;
@@ -33,7 +33,7 @@ h1 { margin-bottom:10px; }
 
 #achievements { text-align:left; display:block; }
 
-/* ---------------- FLAG 追加 ---------------- */
+/* ---------------- FLAG ---------------- */
 .flag {
   width:128px;
   max-width:20vw;
@@ -86,6 +86,7 @@ h1 { margin-bottom:10px; }
   font-size: clamp(12px, calc(24px / (4 / var(--grid-size))), 32px);
   backface-visibility: hidden;
   border:1px solid var(--card-border-color);
+  color:#000000; /* ← 文字黒固定 */
 }
 
 .card-front {
@@ -143,6 +144,7 @@ button:active {
   padding:8px 12px;
   border-radius:6px;
   color: var(--status-text);
+  border:2px solid #000000; /* ← 黒枠追加 */
 }
 
 /* ---------------- MODAL ---------------- */
