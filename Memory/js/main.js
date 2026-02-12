@@ -57,3 +57,13 @@ function updateScore() {
   document.getElementById('playerScore').textContent = pairsFound.player;
   document.getElementById('aiScore').textContent = pairsFound.ai;
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.startGame = startGame;
+    window.stopGame = stopGame;
+    window.nextGame = nextGame;
+    window.showRules = showRules;
+    window.closeRules = closeRules;
+    window.playerTurn = playerTurn;
+    window.aiTurn = aiTurn;
+});
