@@ -3,20 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI真剣衰弱</title>
+<title>AI真剣衰弱 完全版</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- タイトル画面 -->
 <div id="titleScreen" class="screen active">
   <h1>AI真剣衰弱</h1>
 
-  <img 
-    src="https://chloe5355.github.io/HTMLS/img/Columbina.png"
-    class="title-image"
-    draggable="false"
-  >
+  <img src="https://chloe5355.github.io/HTMLS/img/Columbina.png"
+       class="title-image"
+       draggable="false">
 
   <label>盤面サイズ</label>
   <select id="boardSize">
@@ -35,30 +32,24 @@
   <button onclick="startGame()">スタート</button>
 </div>
 
-<!-- ゲーム画面 -->
 <div id="gameScreen" class="screen">
   <div class="top-bar">
-    <div id="turnDisplay">あなたのターン</div>
-    <div>
-      🧑 <span id="playerScore">0</span>　
-      🤖 <span id="aiScore">0</span>
-    </div>
+    <div id="turnText">あなたのターン</div>
+    <div>🧑 <span id="pScore">0</span> | 🤖 <span id="aScore">0</span></div>
   </div>
   <div id="board" class="board"></div>
 </div>
 
-<!-- 結果画面 -->
 <div id="resultScreen" class="screen">
-  <h2 id="winnerText"></h2>
-  <p>あなた: <span id="finalPlayer"></span></p>
-  <p>AI: <span id="finalAI"></span></p>
-
-  <p>通算勝利: <span id="winCount">0</span></p>
-  <p>総試合: <span id="totalGames">0</span></p>
-  <p>勝率: <span id="winRate">0</span>%</p>
+  <h2 id="winner"></h2>
+  <p>あなた: <span id="finalP"></span></p>
+  <p>AI: <span id="finalA"></span></p>
+  <p>勝利数: <span id="wins"></span></p>
+  <p>総試合: <span id="games"></span></p>
+  <p>勝率: <span id="rate"></span>%</p>
 
   <button onclick="restart()">もう一度</button>
-  <button onclick="goTitle()">タイトルへ</button>
+  <button onclick="toTitle()">タイトルへ</button>
   <button onclick="resetData()">データリセット</button>
 </div>
 
