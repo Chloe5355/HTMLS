@@ -8,22 +8,21 @@
 <style>
 /* ---------------- THEME ---------------- */
 :root {
-  --bg-color: #ffffff;          /* 背景：白 */
+  --bg-color: #ffffff;
 
-  --card-bg-color: #000000;     /* カード通常：黒 */
-  --card-border-color: #000000; /* カード枠：黒 */
-  --card-match-bg-color: #ffffff; /* 揃ったカード：白 */
+  --card-bg-color: #000000;
+  --card-border-color: #000000;
+  --card-match-bg-color: #ffffff;
 
-  --button-bg-color: #000000;   /* ボタン背景：黒 */
-  --button-text-color: #ffffff; /* ボタン文字：白 */
+  --button-bg-color: #000000;
+  --button-text-color: #ffffff;
 
-  --status-bg: #000000;         /* ステータス背景：黒 */
-  --status-text: #ffffff;       /* ステータス文字：白 */
+  --status-bg: #000000;
+  --status-text: #ffffff;
 
   --grid-size: 8;
 
-  /* 👇 追加 */
-  --text-color: #000000;        /* 通常文字：黒 */
+  --text-color: #000000;
 }
 
 /* ---------------- BASE ---------------- */
@@ -33,7 +32,7 @@ body {
   margin:0;
   padding:0;
   background: var(--bg-color);
-  color: var(--status-text);
+  color: var(--text-color);  /* ← 修正済み */
 }
 
 .screen { display:none; padding:10px; }
@@ -81,7 +80,11 @@ h1 { margin-bottom:10px; }
   transition:0.2s;
 }
 
-.card.matched { background: var(--card-match-bg-color); cursor:default; transform: scale(1.05); }
+.card.matched {
+  background: var(--card-match-bg-color);
+  cursor:default;
+  transform: scale(1.05);
+}
 
 /* ---------------- BUTTONS ---------------- */
 button {
@@ -128,8 +131,19 @@ button {
 }
 
 /* ---------------- STATUS ---------------- */
-#status { display:flex; justify-content:center; gap:20px; margin:10px 0; }
-#status div { background: var(--status-bg); padding:8px 12px; border-radius:6px; color: var(--status-text); }
+#status {
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  margin:10px 0;
+}
+
+#status div {
+  background: var(--status-bg);
+  padding:8px 12px;
+  border-radius:6px;
+  color: var(--status-text);
+}
 
 /* ---------------- RESPONSIVE ---------------- */
 @media(max-width:600px){
