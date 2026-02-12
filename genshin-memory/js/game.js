@@ -1,275 +1,225 @@
-// ====== 状態管理 ======
-let cards = [];
-let flipped = [];
-let lockBoard = false;
-let currentTurn = "player";
-let score = { player: 0, ai: 0 };
-let gridSize = 8;
-let aiLevel = "normal";
+let currentTurn = 'player';
+let aiLevel = 'medium';
+let board = [];
+let selected = [];
+let pairsFound = { player:0, ai:0 };
 let aiMemory = {};
-
+let gridSize = 8;
 let winCount = 0;
-let totalGames = 0;
+let lockBoard = false; // ターン中カードクリックロック
 
-// ====== 初期ロード ======
-window.onload = () => {
-  winCount = parseInt(localStorage.getItem("wins")) || 0;
-  totalGames = parseInt(localStorage.getItem("games")) || 0;
-};
+// AI思考時間（ミリ秒）
+const aiDelay = { easy: 1500, medium: 1000, hard: 700 };
+const aiExtraDelay = { success: 600, fail: 1200 }; // 揃った場合／失敗時
 
-// ====== ゲーム開始 ======
+// ---------------- GAME START ----------------
 function startGame() {
-  gridSize = parseInt(document.getElementById("boardSize").value);
-  aiLevel = document.getElementById("aiLevel").value;
+  gridSize = parseInt(document.getElementById('boardSize').value);
+  document.documentElement.style.setProperty('--grid-size', gridSize);
 
-  document.getElementById("board").style.gridTemplateColumns =
-    `repeat(${gridSize}, 1fr)`;
+  document.getElementById('titleScreen').classList.remove('active');
+  document.getElementById('gameScreen').classList.add('active');
 
-  showScreen("gameScreen");
-  initBoard();
-}
-
-// ====== 盤面生成 ======
-function initBoard() {
-  const board = document.getElementById("board");
-  board.innerHTML = "";
-
-  cards = [];
-  flipped = [];
-  lockBoard = false;
-  currentTurn = "player";
-  score = { player: 0, ai: 0 };
+  aiLevel = document.getElementById('aiDifficulty').value;
+  pairsFound = { player:0, ai:0 };
   aiMemory = {};
+  currentTurn = 'player';
+  lockBoard = false;
 
-  const total = gridSize * gridSize;
-  let values = [];
-
-  for (let i = 0; i < total / 2; i++) {
-    values.push(i, i);
-  }
-
-  values.sort(() => Math.random() - 0.5);
-
-  values.forEach((val, index) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.dataset.value = val;
-    card.dataset.index = index;
-    card.textContent = ""; // 「？」なし
-
-    card.onclick = () => playerFlip(card);
-
-    board.appendChild(card);
-    cards.push(card);
-  });
-
-  updateUI();
+  initBoard();
+  updateScore();
 }
 
-// ====== プレイヤー処理 ======
-function playerFlip(card) {
-  if (lockBoard) return;
-  if (currentTurn !== "player") return;
-  if (flipped.length >= 2) return;
-  if (card.classList.contains("matched")) return;
-  if (flipped.includes(card)) return;
-
-  reveal(card);
-
-  if (flipped.length === 2) {
-    checkMatch();
-  }
+function stopGame() {
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('winScreen').classList.remove('active');
+  document.getElementById('titleScreen').classList.add('active');
 }
 
-// ====== 共通：カード表示 ======
-function reveal(card) {
-  card.textContent = card.dataset.value;
-  flipped.push(card);
-
-  // AI記憶（レベルnormal以上）
-  if (aiLevel !== "easy") {
-    if (!aiMemory[card.dataset.value]) {
-      aiMemory[card.dataset.value] = [];
-    }
-    if (!aiMemory[card.dataset.value].includes(card)) {
-      aiMemory[card.dataset.value].push(card);
-    }
+// ---------------- INIT BOARD ----------------
+function initBoard(){
+  const boardEl = document.getElementById('board');
+  boardEl.innerHTML = '';
+  board = [];
+  const totalCards = gridSize*gridSize;
+  const icons = ['🗡️','🏹','📖','🌪','🔥','💧','❄','⚡','🪨','🌿'];
+  let cardPairs = [];
+  for(let i=0;i<totalCards/2;i++){
+    let icon = icons[i % icons.length];
+    cardPairs.push(icon, icon);
   }
+  cardPairs.sort(()=>Math.random()-0.5);
+
+  for(let i=0;i<totalCards;i++){
+    let card = document.createElement('div');
+    card.className='card';
+    card.dataset.icon = cardPairs[i];
+    card.textContent = ''; 
+    card.onclick = ()=>playerTurn(card);
+    board.push(card);
+    boardEl.appendChild(card);
+  }
+
+  selected = [];
+  updateScore();
+  currentTurn = 'player';
+  lockBoard = false;
 }
 
-// ====== 判定処理 ======
-function checkMatch() {
-  lockBoard = true;
+// ---------------- PLAYER TURN ----------------
+function playerTurn(card){
+  if(currentTurn !== 'player') return;
+  if(lockBoard) return; 
+  if(selected.includes(card) || card.classList.contains('matched')) return;
 
-  const [a, b] = flipped;
+  card.textContent = card.dataset.icon;
+  selected.push(card);
+  rememberCard(card);
 
-  if (a.dataset.value === b.dataset.value) {
-    // 揃った
-    a.classList.add("matched");
-    b.classList.add("matched");
+  if(selected.length === 2) {
+    lockBoard = true;
+    setTimeout(()=>{
+      checkMatch('player');
+      lockBoard = false;
+    }, 1000);
+  }
 
-    score[currentTurn]++;
+  updateScore();
+}
 
-    delete aiMemory[a.dataset.value];
+// ---------------- AI TURN ----------------
+function aiTurn(){
+  if(currentTurn !== 'ai') return;
+  lockBoard = true; 
+  let available = board.filter(c=>!c.classList.contains('matched') && !selected.includes(c));
+  if(available.length<2) return;
 
-    flipped = [];
+  let [c1, c2] = pickSmartAICards(available);
+
+  c1.textContent = c1.dataset.icon;
+  c2.textContent = c2.dataset.icon;
+  rememberCard(c1);
+  rememberCard(c2);
+  selected = [c1,c2];
+
+  updateScore();
+
+  // 揃っているか確認して遅延を調整
+  let delay = (c1.dataset.icon === c2.dataset.icon) ? aiExtraDelay.success : aiExtraDelay.fail;
+  setTimeout(()=>{
+    checkMatch('ai');
     lockBoard = false;
+  }, delay);
+}
 
-    updateUI();
+// ---------------- CHECK MATCH ----------------
+function checkMatch(player){
+  const [c1,c2] = selected;
+  if(c1.dataset.icon === c2.dataset.icon){
+    c1.classList.add('matched');
+    c2.classList.add('matched');
+    pairsFound[player]++;
+    removeFromMemory(c1.dataset.icon,[c1,c2]);
+    selected = [];
+    updateScore();
 
-    if (isGameEnd()) finishGame();
-    else if (currentTurn === "ai") {
-      // AIは揃ったら続行
-      setTimeout(aiTurn, 1000);
+    if(isGameOver()) {
+      showWin();
+    } else {
+      if(player==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
     }
 
   } else {
-    // 外れ
-    setTimeout(() => {
-      a.textContent = "";
-      b.textContent = "";
-
-      flipped = [];
-      currentTurn = currentTurn === "player" ? "ai" : "player";
-      updateUI();
-
-      lockBoard = false;
-
-      if (currentTurn === "ai") {
-        setTimeout(aiTurn, 1000);
-      }
-    }, 1000); // 表示1秒
+    setTimeout(()=>{
+      c1.textContent='';
+      c2.textContent='';
+      selected = [];
+      currentTurn = (player==='player') ? 'ai' : 'player';
+      updateScore();
+      if(currentTurn==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
+    }, 1000);
   }
 }
 
-// ====== AI処理 ======
-function aiTurn() {
-  if (lockBoard) return;
+// ---------------- AI MEMORY ----------------
+function rememberCard(card){
+  if(!aiMemory[card.dataset.icon]) aiMemory[card.dataset.icon]=[];
+  if(!aiMemory[card.dataset.icon].includes(card)) aiMemory[card.dataset.icon].push(card);
+}
 
-  let first, second;
+function removeFromMemory(icon, cards){
+  if(aiMemory[icon]){
+    aiMemory[icon] = aiMemory[icon].filter(c=>!cards.includes(c));
+    if(aiMemory[icon].length===0) delete aiMemory[icon];
+  }
+}
 
-  // HARD / NORMAL は既知ペア優先
-  if (aiLevel !== "easy") {
-    const known = findKnownPair();
-    if (known) {
-      [first, second] = known;
-    }
+// ---------------- SMART AI CARD PICK ----------------
+function pickSmartAICards(available){
+  // 覚えたカードで揃えられるペアをランダムに選ぶ
+  let possiblePairs = [];
+  for(let icon in aiMemory){
+    let knownCards = aiMemory[icon].filter(c=>available.includes(c));
+    if(knownCards.length>=2) possiblePairs.push([knownCards[0], knownCards[1]]);
+  }
+  if(possiblePairs.length>0){
+    return possiblePairs[Math.floor(Math.random()*possiblePairs.length)];
   }
 
-  // 見つからなければランダム
-  if (!first) {
-    [first, second] = randomPick();
+  // 覚えたカード1枚＋ランダム
+  let singleOptions = [];
+  for(let icon in aiMemory){
+    let knownCards = aiMemory[icon].filter(c=>available.includes(c));
+    if(knownCards.length===1) singleOptions.push(knownCards[0]);
+  }
+  if(singleOptions.length>0){
+    let known = singleOptions[Math.floor(Math.random()*singleOptions.length)];
+    let randomCandidates = available.filter(c=>c!==known);
+    let randomCard = randomCandidates[Math.floor(Math.random()*randomCandidates.length)];
+    return [known, randomCard];
   }
 
-  reveal(first);
-
-  setTimeout(() => {
-    reveal(second);
-    checkMatch();
-  }, 800);
+  // 完全ランダム
+  let idx1=Math.floor(Math.random()*available.length);
+  let idx2=Math.floor(Math.random()*available.length);
+  if(idx1===idx2) idx2=(idx2+1)%available.length;
+  return [available[idx1], available[idx2]];
 }
 
-// ====== ランダム選択 ======
-function randomPick() {
-  const available = cards.filter(c =>
-    !c.classList.contains("matched") &&
-    !flipped.includes(c)
-  );
-
-  const a = available[Math.floor(Math.random() * available.length)];
-  let b;
-
-  do {
-    b = available[Math.floor(Math.random() * available.length)];
-  } while (a === b);
-
-  return [a, b];
+// ---------------- GAME OVER ----------------
+function isGameOver(){
+  return board.every(c=>c.classList.contains('matched'));
 }
 
-// ====== 記憶ペア探索 ======
-function findKnownPair() {
-  for (let key in aiMemory) {
-    const valid = aiMemory[key].filter(c =>
-      !c.classList.contains("matched")
-    );
-    if (valid.length >= 2) {
-      return [valid[0], valid[1]];
-    }
-  }
-  return null;
-}
+function showWin(){
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('winScreen').classList.add('active');
+  document.getElementById('playerPairs').textContent = pairsFound.player;
+  document.getElementById('aiPairs').textContent = pairsFound.ai;
 
-// ====== UI更新 ======
-function updateUI() {
-  document.getElementById("turnText").textContent =
-    currentTurn === "player" ? "あなたのターン" : "AIのターン";
-
-  document.getElementById("pScore").textContent = score.player;
-  document.getElementById("aScore").textContent = score.ai;
-}
-
-// ====== 終了判定 ======
-function isGameEnd() {
-  return score.player + score.ai === (gridSize * gridSize) / 2;
-}
-
-// ====== 結果処理 ======
-function finishGame() {
-  totalGames++;
-
-  let winnerText = "引き分け";
-
-  if (score.player > score.ai) {
-    winnerText = "あなたの勝ち！";
+  if(pairsFound.player > pairsFound.ai){
+    document.getElementById('winner').textContent = 'あなた';
     winCount++;
-  } else if (score.player < score.ai) {
-    winnerText = "AIの勝ち！";
+    document.getElementById('winCount').textContent = winCount;
+  } else if(pairsFound.player < pairsFound.ai){
+    document.getElementById('winner').textContent = 'AI';
+  } else {
+    document.getElementById('winner').textContent = '引き分け';
   }
-
-  localStorage.setItem("wins", winCount);
-  localStorage.setItem("games", totalGames);
-
-  document.getElementById("winner").textContent = winnerText;
-  document.getElementById("finalP").textContent = score.player;
-  document.getElementById("finalA").textContent = score.ai;
-  document.getElementById("wins").textContent = winCount;
-  document.getElementById("games").textContent = totalGames;
-
-  const rate = totalGames === 0
-    ? 0
-    : Math.round((winCount / totalGames) * 100);
-
-  document.getElementById("rate").textContent = rate;
-
-  showScreen("resultScreen");
 }
 
-// ====== 画面制御 ======
-function restart() {
-  showScreen("gameScreen");
-  initBoard();
+function nextGame(){
+  document.getElementById('winScreen').classList.remove('active');
+  startGame();
 }
 
-function toTitle() {
-  showScreen("titleScreen");
-}
+// ---------------- RULES ----------------
+function showRules(){ document.getElementById('rulesModal').style.display='flex'; }
+function closeRules(){ document.getElementById('rulesModal').style.display='none'; }
 
-function resetData() {
-  if (!confirm("データをリセットしますか？")) return;
-
-  localStorage.removeItem("wins");
-  localStorage.removeItem("games");
-
-  winCount = 0;
-  totalGames = 0;
-
-  alert("リセットしました");
-}
-
-// ====== 画面切替 ======
-function showScreen(id) {
-  document.querySelectorAll(".screen")
-    .forEach(s => s.classList.remove("active"));
-
-  document.getElementById(id).classList.add("active");
+// ---------------- SCORE UPDATE ----------------
+function updateScore(){
+  document.getElementById('currentTurn').textContent = (currentTurn==='player')?'あなた':'AI';
+  document.getElementById('playerScore').textContent = pairsFound.player;
+  document.getElementById('aiScore').textContent = pairsFound.ai;
 }
