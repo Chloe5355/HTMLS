@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI真剣衰弱 完全版</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI真剣衰弱</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -35,7 +35,10 @@
 <div id="gameScreen" class="screen">
   <div class="top-bar">
     <div id="turnText">あなたのターン</div>
-    <div>🧑 <span id="pScore">0</span> | 🤖 <span id="aScore">0</span></div>
+    <div>
+      あなた: <span id="pScore">0</span>　
+      AI: <span id="aScore">0</span>
+    </div>
   </div>
   <div id="board" class="board"></div>
 </div>
@@ -44,9 +47,10 @@
   <h2 id="winner"></h2>
   <p>あなた: <span id="finalP"></span></p>
   <p>AI: <span id="finalA"></span></p>
-  <p>勝利数: <span id="wins"></span></p>
-  <p>総試合: <span id="games"></span></p>
-  <p>勝率: <span id="rate"></span>%</p>
+
+  <p>勝利数: <span id="wins">0</span></p>
+  <p>総試合: <span id="games">0</span></p>
+  <p>勝率: <span id="rate">0</span>%</p>
 
   <button onclick="restart()">もう一度</button>
   <button onclick="toTitle()">タイトルへ</button>
