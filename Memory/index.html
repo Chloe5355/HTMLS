@@ -4,7 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>真剣衰弱</title>
-<link rel="stylesheet" href="css/style.css">
+
+<!-- CSS 分割版 -->
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/board.css">
+<link rel="stylesheet" href="css/buttons.css">
+<link rel="stylesheet" href="css/modal.css">
+<link rel="stylesheet" href="css/ui.css">
+<link rel="stylesheet" href="css/responsive.css">
+
 </head>
 <body>
 
@@ -17,7 +25,6 @@
   <select id="boardSize">
     <option value="4">4x4</option>
     <option value="8" selected>8x8</option>
-    <option value="16">16x16</option>
   </select>
   <br>
 
@@ -59,11 +66,12 @@
   <!-- ターン＆スコア表示 -->
   <div id="status">
     <p>現在のターン: <span id="currentTurn">あなた</span></p>
-    <p>あなた: <span id="playerScore">0</span> 枚</p>
-    <p>AI: <span id="aiScore">0</span> 枚</p>
+    <div id="playerScoreBox">あなた: <span id="playerScore">0</span> 枚</div>
+    <div id="aiScoreBox">AI: <span id="aiScore">0</span> 枚</div>
   </div>
 
   <div id="board" class="board"></div>
+  <div id="aiThinking"></div>
 </div>
 
 <!-- 結果画面 -->
@@ -76,6 +84,14 @@
   <button onclick="stopGame()">タイトルに戻る</button>
 </div>
 
-<script src="js/game.js"></script>
+<!-- JS 分割版 -->
+<script src="js/board.js"></script>
+<script src="js/player.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/match.js"></script>
+<script src="js/gameOver.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+
 </body>
 </html>
