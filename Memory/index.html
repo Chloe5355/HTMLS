@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>真剣衰弱</title>
 
-<!-- CSS 分割版 -->
+<!-- CSS -->
+<link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/board.css">
 <link rel="stylesheet" href="css/buttons.css">
 <link rel="stylesheet" href="css/modal.css">
 <link rel="stylesheet" href="css/ui.css">
 <link rel="stylesheet" href="css/responsive.css">
-
 </head>
 <body>
 
@@ -39,7 +39,6 @@
   <button onclick="startGame()">▶ ゲーム開始</button>
   <button onclick="showRules()">📖 ルール</button>
 
-  <!-- 実績 -->
   <div id="achievements">
     <h3>📜 実績</h3>
     <ul id="achievementList">
@@ -63,7 +62,6 @@
     <button onclick="stopGame()">⏹ ゲーム終了</button>
   </div>
 
-  <!-- ターン＆スコア表示 -->
   <div id="status">
     <p>現在のターン: <span id="currentTurn">あなた</span></p>
     <div id="playerScoreBox">あなた: <span id="playerScore">0</span> 枚</div>
@@ -84,7 +82,7 @@
   <button onclick="stopGame()">タイトルに戻る</button>
 </div>
 
-<!-- JS 分割版 -->
+<!-- JS -->
 <script src="js/board.js"></script>
 <script src="js/player.js"></script>
 <script src="js/ai.js"></script>
