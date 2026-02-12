@@ -1,33 +1,25 @@
-// match.js
 function checkMatch(player){
   const [c1,c2] = selected;
-  if(c1.dataset.icon === c2.dataset.icon){
-    [c1, c2].forEach(c=>{
-      c.classList.add('matched','animate');
-      setTimeout(()=>c.classList.remove('animate'),500);
-    });
 
+  if(c1.dataset.icon===c2.dataset.icon){
+    c1.classList.add('matched');
+    c2.classList.add('matched');
     pairsFound[player]++;
     removeFromMemory(c1.dataset.icon,[c1,c2]);
-    selected = [];
+    selected=[];
     updateScore();
-
-    const scoreSpan = (player==='player') ? document.getElementById('playerScore') : document.getElementById('aiScore');
-    scoreSpan.classList.add('score-pop');
-    setTimeout(()=>scoreSpan.classList.remove('score-pop'), 500);
 
     if(isGameOver()) showWin();
     else if(player==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
 
   } else {
     setTimeout(()=>{
-      c1.textContent=''; 
+      c1.textContent='';
       c2.textContent='';
-      selected = [];
-      // ターン切替を明示
-      currentTurn = (player==='player') ? 'ai' : 'player';
+      selected=[];
+      currentTurn = (player==='player')?'ai':'player';
       updateScore();
       if(currentTurn==='ai') setTimeout(aiTurn, aiDelay[aiLevel]);
-    }, 1000);
+    },1000);
   }
 }
