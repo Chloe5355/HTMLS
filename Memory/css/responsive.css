@@ -1,0 +1,32 @@
+/* responsive.css */
+@media(max-width:600px) {
+  body {
+    font-size: 16px;
+  }
+
+  .flag {
+    width: 80px;
+    max-width: 30vw;
+    margin: 20px auto;
+  }
+
+  .card {
+    font-size: calc(18px / (4 / var(--grid-size)));
+    width: calc(90vw / var(--grid-size));
+    height: calc(90vw / var(--grid-size));
+  }
+
+  .board {
+    grid-gap: 2px;
+  }
+
+  button {
+    font-size: 1.3em;
+    padding: 12px 20px;
+  }
+
+  .modalContent {
+    max-width: 90%;
+    font-size: 1em;
+  }
+}
