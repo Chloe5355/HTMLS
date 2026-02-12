@@ -1,0 +1,40 @@
+/* base.css */
+:root {
+  --bg-color: #ffffff;
+  --card-bg-color: #ffffff;
+  --card-border-color: #000;
+  --card-match-bg-color: #8f8;
+  --button-bg-color: #4CAF50;
+  --button-text-color: #fff;
+  --grid-size: 8;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-color);
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+.screen {
+  display: none;
+  padding: 10px;
+}
+
+.screen.active {
+  display: block;
+}
+
+.flag {
+  width: 128px;
+  max-width: 20vw;
+  border-radius: 50%;
+  border: 1.5px solid black;
+  margin: 20px auto;
+  display: block;
+}
