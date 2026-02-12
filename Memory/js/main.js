@@ -1,19 +1,23 @@
-// main.js
 let currentTurn = 'player';
 let aiLevel = 'medium';
-let gridSize = 8;
-let lockBoard = false;
+let board = [];
+let selected = [];
 let pairsFound = { player:0, ai:0 };
-let aiDelay = { easy: 1500, medium: 1000, hard: 700 };
-let aiExtraDelay = { success: 600, fail: 1200 };
+let aiMemory = {};
+let gridSize = 8;
 let winCount = 0;
+let lockBoard = false;
 
-// 実績をオブジェクトで管理
-let achievements = {
-  win: 0,
-  lose: 0,
-  draw: 0
-};
+const aiDelay = { easy:1500, medium:1000, hard:700 };
+const aiExtraDelay = { success:600, fail:1200 };
+
+// HTMLから呼び出す関数は window に公開
+window.startGame = startGame;
+window.stopGame = stopGame;
+window.nextGame = nextGame;
+window.showRules = showRules;
+window.closeRules = closeRules;
+window.playerTurn = playerTurn;
 
 function startGame() {
   gridSize = parseInt(document.getElementById('boardSize').value);
@@ -24,11 +28,13 @@ function startGame() {
 
   aiLevel = document.getElementById('aiDifficulty').value;
   pairsFound = { player:0, ai:0 };
+  aiMemory = {};
   currentTurn = 'player';
   lockBoard = false;
 
   initBoard();
   updateScore();
+  if(currentTurn === 'ai') setTimeout(aiTurn, aiDelay[aiLevel]);
 }
 
 function stopGame() {
@@ -37,11 +43,16 @@ function stopGame() {
   document.getElementById('titleScreen').classList.add('active');
 }
 
-// 実績更新
-function updateAchievements(result){
-  if(result === 'あなた') achievements.win++;
-  else if(result === 'AI') achievements.lose++;
-  else achievements.draw++;
+function nextGame() {
+  document.getElementById('winScreen').classList.remove('active');
+  startGame();
+}
 
-  document.getElementById('winCount').textContent = achievements.win;
+function showRules(){ document.getElementById('rulesModal').style.display='flex'; }
+function closeRules(){ document.getElementById('rulesModal').style.display='none'; }
+
+function updateScore() {
+  document.getElementById('currentTurn').textContent = (currentTurn==='player')?'あなた':'AI';
+  document.getElementById('playerScore').textContent = pairsFound.player;
+  document.getElementById('aiScore').textContent = pairsFound.ai;
 }
