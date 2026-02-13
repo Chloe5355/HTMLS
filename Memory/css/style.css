@@ -134,13 +134,13 @@ button:active {
 /* ---------------- STATUS ---------------- */
 #status {
   display: flex;
-  flex-direction: column; /* 縦に並べる */
+  flex-direction: column; /* 縦並び */
   align-items: center;
   gap: 8px;
   margin: 10px 0;
 }
 
-#status span {
+.statusBox {
   background: #ffffff;        /* 白背景 */
   color: #000000;             /* 黒文字 */
   border: 2px solid #000000;  /* 黒枠 */
@@ -148,12 +148,12 @@ button:active {
   border-radius: 6px;
   text-align: center;
   display: inline-block;
-  min-width: 100px;
+  min-width: 120px;
 }
 
 #status div {
-  display: flex;
-  gap: 12px; /* 枚数の間隔 */
+  display: flex;  /* 枚数を横並び */
+  gap: 12px;      /* 枚数の間隔 */
 }
 
 /* ---------------- MODAL ---------------- */
