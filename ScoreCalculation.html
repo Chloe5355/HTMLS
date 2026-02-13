@@ -10,15 +10,17 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
     background: #f2f6ff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
 }
 
 .container {
-    width: 90%;
-    max-width: 400px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 input {
@@ -34,25 +36,19 @@ input {
 
 .result {
     text-align: center;
-    font-size: 32px;
+    font-size: 34px;
     font-weight: bold;
     color: #1e90ff;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 数字1 -->
-    <input type="number" id="num1" placeholder="Score 1">
-
-    <!-- 数字2（×2される） -->
-    <input type="number" id="num2" placeholder="Score 2 (×2)">
-
-    <!-- 数字3 -->
-    <input type="number" id="num3" placeholder="Score 3">
-
+    <input type="number" step="any" id="num1" placeholder="Score 1">
+    <input type="number" step="any" id="num2" placeholder="Score 2 (×2)">
+    <input type="number" step="any" id="num3" placeholder="Score 3">
     <div class="result" id="result">0</div>
 </div>
 
@@ -67,8 +63,8 @@ function calculate() {
     const v2 = parseFloat(n2.value) || 0;
     const v3 = parseFloat(n3.value) || 0;
 
-    // 数字1 + (数字2 × 2) + 数字3
     const answer = v1 + (v2 * 2) + v3;
+
     result.textContent = answer;
 }
 
