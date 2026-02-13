@@ -31,12 +31,11 @@ function initBoard(){
   cardPairs.sort(()=>Math.random()-0.5);
 
   for(let i=0;i<totalCards;i++){
-
     let card=document.createElement('div');
     card.className='card';
     card.dataset.icon=cardPairs[i];
 
-    // ★ 3D構造
+    // 3D構造
     card.innerHTML=`
       <div class="card-inner">
         <div class="card-front"></div>
@@ -61,7 +60,6 @@ function playerTurn(card){
   if(currentTurn!=='player'||lockBoard||selected.includes(card)||card.classList.contains('matched')) return;
 
   card.classList.add("flipped");
-
   selected.push(card);
   rememberCard(card);
 
@@ -101,12 +99,10 @@ function checkMatch(player){
   const [c1,c2]=selected;
 
   if(c1.dataset.icon===c2.dataset.icon){
-
     c1.classList.add('matched');
     c2.classList.add('matched');
 
     pairsFound[player]++;
-
     removeFromMemory(c1.dataset.icon,[c1,c2]);
 
     selected=[];
@@ -117,9 +113,7 @@ function checkMatch(player){
     }else if(player==='ai'){
       setTimeout(aiTurn, aiDelay[aiLevel]);
     }
-
-  }else{
-
+  } else {
     setTimeout(()=>{
       c1.classList.remove("flipped");
       c2.classList.remove("flipped");
@@ -155,7 +149,6 @@ function removeFromMemory(icon,cards){
 
 /* ---------------- SMART PICK ---------------- */
 function pickSmartAICards(available){
-
   let possiblePairs=[];
 
   for(let icon in aiMemory){
@@ -168,7 +161,6 @@ function pickSmartAICards(available){
     return possiblePairs[Math.floor(Math.random()*possiblePairs.length)];
 
   let singleOptions=[];
-
   for(let icon in aiMemory){
     let known=aiMemory[icon].filter(c=>available.includes(c));
     if(known.length===1)
@@ -229,10 +221,12 @@ function startGame(){
   lockBoard=false;
 
   initBoard();
-  updateScore();
 
+  // AI ターンなら自動で実行
   if(currentTurn==='ai')
     setTimeout(aiTurn, aiDelay[aiLevel]);
+
+  updateScore();
 }
 
 function stopGame(){
@@ -257,11 +251,30 @@ function closeRules(){
 
 /* ---------------- SCORE ---------------- */
 function updateScore(){
-  document.getElementById('currentTurnBox').textContent =
-    `現在のターン : ${(currentTurn==='player') ? 'あなた' : 'AI'}`;
+  // 現在のターン（黒枠）
+  const turnBox = document.getElementById('currentTurnBox');
+  const turnName = (currentTurn==='player') ? 'あなた' : 'AI';
+  turnBox.textContent = `現在のターン : ${turnName}`;
+  turnBox.style.border = '2px solid #000';
+  turnBox.style.padding = '6px 12px';
+  turnBox.style.borderRadius = '6px';
+  turnBox.style.display = 'inline-block';
+  turnBox.style.backgroundColor = '#fff';
+  turnBox.style.marginBottom = '8px';
 
-  document.getElementById('playerScoreBox').textContent =
-    `あなた : ${pairsFound.player}枚`;
-  document.getElementById('aiScoreBox').textContent =
-    `AI : ${pairsFound.ai}枚`;
+  // 枚数表示（横並び）
+  const playerBox = document.getElementById('playerScoreBox');
+  const aiBox = document.getElementById('aiScoreBox');
+
+  playerBox.textContent = `あなた : ${pairsFound.player}枚`;
+  aiBox.textContent = `AI : ${pairsFound.ai}枚`;
+
+  [playerBox, aiBox].forEach(box=>{
+    box.style.border = '2px solid #000';
+    box.style.padding = '6px 12px';
+    box.style.borderRadius = '6px';
+    box.style.display = 'inline-block';
+    box.style.backgroundColor = '#fff';
+    box.style.margin = '0 6px';
+  });
 }
