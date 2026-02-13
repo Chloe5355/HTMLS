@@ -155,6 +155,7 @@ button:active {
   border-radius: 6px;
   min-width: 40px;
   text-align: center;
+  font-weight: bold;
 }
 
 /* ---------------- MODAL ---------------- */
