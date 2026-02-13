@@ -134,26 +134,27 @@ button:active {
 /* ---------------- STATUS ---------------- */
 #status {
   display: flex;
-  flex-direction: column;  /* 縦方向に配置 */
+  flex-direction: column; /* 縦に並べる */
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin: 10px 0;
 }
 
-#scoreContainer {
+#status p {
   display: flex;
-  gap: 20px;  /* 左右の間隔 */
+  gap: 12px; /* 横並びの間隔 */
+  margin: 0;
 }
 
-#scoreContainer span {
-  background: #ffffff;       /* 白背景 */
-  color: #000000;            /* 黒文字 */
-  border: 2px solid #000000; /* 黒枠 */
+#status span {
+  background: #ffffff;        /* 白背景 */
+  color: #000000;             /* 黒文字 */
+  border: 2px solid #000000;  /* 黒枠 */
   padding: 6px 12px;
   border-radius: 6px;
+  min-width: 60px;
   text-align: center;
-  font-weight: bold;
-  min-width: 80px;
+  display: inline-block;
 }
 
 /* ---------------- MODAL ---------------- */
