@@ -257,10 +257,10 @@ function closeRules(){
 
 /* ---------------- SCORE ---------------- */
 function updateScore(){
-  // 現在のターン表示
-  document.getElementById('currentTurn').textContent = (currentTurn==='player') ? 'あなた' : 'AI';
+  // 現在のターン
+  document.getElementById('currentTurnBox').textContent = `現在のターン : ${(currentTurn==='player') ? 'あなた' : 'AI'}`;
 
-  // 枚数をそれぞれのボックスに表示
+  // 枚数
   document.getElementById('playerScoreBox').textContent = `あなた : ${pairsFound.player}枚`;
   document.getElementById('aiScoreBox').textContent = `AI : ${pairsFound.ai}枚`;
 }
