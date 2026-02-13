@@ -258,9 +258,12 @@ function closeRules(){
 /* ---------------- SCORE ---------------- */
 function updateScore(){
   // 現在のターン
-  document.getElementById('currentTurnBox').textContent = `現在のターン : ${(currentTurn==='player') ? 'あなた' : 'AI'}`;
+  document.getElementById('currentTurnBox').textContent =
+    `現在のターン : ${(currentTurn==='player') ? 'あなた' : 'AI'}`;
 
   // 枚数
-  document.getElementById('playerScoreBox').textContent = `あなた : ${pairsFound.player}枚`;
-  document.getElementById('aiScoreBox').textContent = `AI : ${pairsFound.ai}枚`;
+  document.getElementById('playerScoreBox').textContent =
+    `あなた : ${pairsFound.player}枚`;
+  document.getElementById('aiScoreBox').textContent =
+    `AI : ${pairsFound.ai}枚`;
 }
