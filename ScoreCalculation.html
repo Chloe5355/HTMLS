@@ -35,33 +35,38 @@ input {
     box-sizing: border-box;
 }
 
-.result-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 10px;
-}
-
-button {
-    font-size: 16px;
-    padding: 8px 14px;
-    border-radius: 10px;
-    border: none;
-    background: #ff4d4d;
-    color: white;
-}
-
 .result {
+    text-align: center;
     font-size: 34px;
     font-weight: bold;
     color: #1e90ff;
+    margin-top: 10px;
 }
 
+.button-area {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+button {
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: none;
+    color: white;
+}
+
+.save-btn { background: #1e90ff; }
+.reset-btn { background: #ff4d4d; }
+.csv-btn { background: #28a745; }
+
 .history {
-    margin-top: 260px;
+    margin-top: 360px;
     padding: 15px;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .history-item {
@@ -70,19 +75,28 @@ button {
     margin-bottom: 8px;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    cursor: pointer;
+}
+
+.date {
+    font-size: 12px;
+    color: gray;
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <input type="number" step="any" id="num1" placeholder=" ">
-    <input type="number" step="any" id="num2" placeholder="会心率">
-    <input type="number" step="any" id="num3" placeholder="会心ダメージ">
+    <input type="number" step="any" id="num1" placeholder="Score 1">
+    <input type="number" step="any" id="num2" placeholder="Score 2 (×2)">
+    <input type="number" step="any" id="num3" placeholder="Score 3">
 
-    <div class="result-area">
-        <button onclick="resetAll()">Reset</button>
-        <div class="result">= <span id="result">0</span></div>
+    <div class="result">= <span id="result">0</span></div>
+
+    <div class="button-area">
+        <button class="save-btn" onclick="saveHistory()">保存</button>
+        <button class="csv-btn" onclick="downloadCSV()">CSV</button>
+        <button class="reset-btn" onclick="resetAll()">リセット</button>
     </div>
 </div>
 
@@ -95,45 +109,83 @@ const n3 = document.getElementById("num3");
 const result = document.getElementById("result");
 const historyDiv = document.getElementById("history");
 
-let lastExpression = "";
+let historyList = JSON.parse(localStorage.getItem("scoreHistory")) || [];
+
+renderHistory();
 
 function calculate() {
     const v1 = parseFloat(n1.value) || 0;
     const v2 = parseFloat(n2.value) || 0;
     const v3 = parseFloat(n3.value) || 0;
-
-    const answer = v1 + (v2 * 2) + v3;
-    result.textContent = answer;
-
-    const expression = `${v1} + (${v2}×2) + ${v3} = ${answer}`;
-
-    if (expression !== lastExpression) {
-        addHistory(expression);
-        lastExpression = expression;
-    }
+    result.textContent = v1 + (v2 * 2) + v3;
 }
 
-function addHistory(text) {
-    const item = document.createElement("div");
-    item.className = "history-item";
-    item.textContent = text;
-    historyDiv.prepend(item);
+function saveHistory() {
+    const v1 = parseFloat(n1.value) || 0;
+    const v2 = parseFloat(n2.value) || 0;
+    const v3 = parseFloat(n3.value) || 0;
+    const answer = v1 + (v2 * 2) + v3;
+
+    const now = new Date();
+    const timestamp = now.toLocaleString();
+
+    const entry = {
+        v1, v2, v3, answer, timestamp
+    };
+
+    historyList.unshift(entry);
+    localStorage.setItem("scoreHistory", JSON.stringify(historyList));
+    renderHistory();
+}
+
+function renderHistory() {
+    historyDiv.innerHTML = "";
+    historyList.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.innerHTML = `
+            <div>${item.v1} + (${item.v2}×2) + ${item.v3} = ${item.answer}</div>
+            <div class="date">${item.timestamp}</div>
+        `;
+
+        div.onclick = () => {
+            n1.value = item.v1;
+            n2.value = item.v2;
+            n3.value = item.v3;
+            calculate();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        };
+
+        historyDiv.appendChild(div);
+    });
+}
+
+function downloadCSV() {
+    if (historyList.length === 0) return;
+
+    let csv = "Score1,Score2(x2),Score3,Result,Date\n";
+    historyList.forEach(item => {
+        csv += `${item.v1},${item.v2},${item.v3},${item.answer},${item.timestamp}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "score_history.csv";
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 function resetAll() {
-    // 入力クリア
     n1.value = "";
     n2.value = "";
     n3.value = "";
-
-    // 結果リセット
     result.textContent = "0";
 
-    // 履歴クリア
-    historyDiv.innerHTML = "";
-
-    // 重複防止リセット
-    lastExpression = "";
+    historyList = [];
+    localStorage.removeItem("scoreHistory");
+    renderHistory();
 }
 
 n1.addEventListener("input", calculate);
