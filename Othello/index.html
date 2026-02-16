@@ -22,12 +22,21 @@
   </label>
 
   <select id="difficulty">
-    <option value="easy">Easy</option>
-    <option value="medium" selected>Medium</option>
-    <option value="hard">Hard</option>
+    <option value="easy">弱</option>
+    <option value="medium" selected>中</option>
+    <option value="hard">強</option>
   </select>
 
   <button id="startBtn">ゲーム開始</button>
+
+  <div>
+    <label>表示切替：
+      <select id="statsMode">
+        <option value="ai">AI戦</option>
+        <option value="pvp">対人戦</option>
+      </select>
+    </label>
+  </div>
 
   <div id="stats"></div>
 </div>
