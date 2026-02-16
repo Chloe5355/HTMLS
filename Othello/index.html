@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>オセロ Ultimate</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>オセロ Ultimate</h1>
+
+<div class="controls">
+  AI:
+  <select id="aiToggle">
+    <option value="on">オン</option>
+    <option value="off">オフ（2人対戦）</option>
+  </select>
+
+  あなたの色:
+  <select id="colorSelect">
+    <option value="black">黒</option>
+    <option value="white">白</option>
+  </select>
+
+  AIレベル:
+  <select id="aiLevel">
+    <option value="easy">かんたん</option>
+    <option value="normal">ふつう</option>
+    <option value="hard">つよい</option>
+  </select>
+
+  <button onclick="resetGame()">新しい対戦</button>
+  <button onclick="clearLogs()">履歴クリア</button>
+</div>
+
+<div id="board"></div>
+<div id="info"></div>
+
+<h3>戦績</h3>
+<div id="stats"></div>
+
+<h3>対戦履歴</h3>
+<div id="log"></div>
+
+<script src="js/game.js"></script>
+</body>
+</html>
