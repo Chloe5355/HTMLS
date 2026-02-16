@@ -39,7 +39,7 @@ body{
   top:10%;
   left:10%;
   transform-style:preserve-3d;
-  transition:transform 0.3s;
+  transition:transform 0.45s;
 }
 
 .disk.flip{
@@ -61,15 +61,6 @@ body{
   font-size:14px;
   text-align:left;
   display:inline-block;
-}
-
-.achievement{
-  opacity:0.3;
-}
-
-.achievement.unlocked{
-  opacity:1;
-  color:gold;
 }
 
 /* ===== 勝利演出 ===== */
