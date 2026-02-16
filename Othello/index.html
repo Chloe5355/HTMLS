@@ -4,46 +4,57 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>オセロ Ultimate</title>
-
-<link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<h1>オセロ Ultimate</h1>
+<!-- ===== タイトル画面 ===== -->
+<div id="titleScreen" class="screen active">
 
-<div class="controls">
-  AI:
-  <select id="aiToggle">
-    <option value="on">オン</option>
-    <option value="off">オフ（2人対戦）</option>
-  </select>
+  <img id="flag" class="flag"
+  src="https://chloe5355.github.io/HTMLS/img/Columbina.png"
+  alt="旗">
 
-  あなたの色:
-  <select id="colorSelect">
-    <option value="black">黒</option>
-    <option value="white">白</option>
-  </select>
+  <h1>♟ オセロ Ultimate</h1>
 
-  AIレベル:
-  <select id="aiLevel">
-    <option value="easy">かんたん</option>
-    <option value="normal">ふつう</option>
-    <option value="hard">つよい</option>
-  </select>
+  <div class="menu">
+    <label>AI:
+      <select id="aiToggle">
+        <option value="on">オン</option>
+        <option value="off">オフ（2人対戦）</option>
+      </select>
+    </label>
 
-  <button onclick="resetGame()">新しい対戦</button>
-  <button onclick="clearLogs()">履歴クリア</button>
+    <label>難易度:
+      <select id="aiLevel">
+        <option value="easy">やさしい</option>
+        <option value="normal">ふつう</option>
+        <option value="hard">つよい</option>
+      </select>
+    </label>
+  </div>
+
+  <button id="startBtn" class="bigBtn">▶ ゲーム開始</button>
+  <button onclick="showAchievements()">🏅 実績</button>
 </div>
 
-<div id="board"></div>
-<div id="info"></div>
+<!-- ===== ゲーム画面 ===== -->
+<div id="gameScreen" class="screen">
+  <h2 id="turnLabel"></h2>
+  <div id="scoreBoard"></div>
+  <div id="board"></div>
 
-<h3>戦績</h3>
-<div id="stats"></div>
+  <div class="controls">
+    <button onclick="initGame()">リスタート</button>
+    <button id="backBtn">タイトルへ戻る</button>
+  </div>
+</div>
 
-<h3>対戦履歴</h3>
-<div id="log"></div>
+<!-- 勝利演出 -->
+<div id="winOverlay">
+  <div class="winText" id="winMessage"></div>
+  <button onclick="closeWin()">OK</button>
+</div>
 
 <script src="js/game.js"></script>
 </body>
