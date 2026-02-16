@@ -1,64 +1,28 @@
+:root{
+  --card-border-color:#ccc;
+}
+
 body{
-  margin:0;
   font-family:sans-serif;
-  background:#0b5d1e;
-  color:white;
   text-align:center;
+  background:#1f7a3a;
+  color:white;
+  margin:0;
 }
 
-.screen{ display:none; padding:20px; }
-.screen.active{ display:block; }
-
-.flag{
-  width:180px;
-  max-width:70%;
-  margin-bottom:15px;
-  animation:float 3s ease-in-out infinite;
-}
-
-@keyframes float{
-  0%{ transform:translateY(0); }
-  50%{ transform:translateY(-10px); }
-  100%{ transform:translateY(0); }
-}
-
-.menu{
-  margin:20px 0;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-select, button{
-  padding:8px;
-  font-size:16px;
-}
-
-.bigBtn{
-  font-size:20px;
-  padding:12px 24px;
-}
-
-#scoreBoard{
-  margin-top:10px;
-  font-size:18px;
-}
-
+/* ===== 盤面 ===== */
 #board{
-  display:grid;
-  grid-template-columns:repeat(8,40px);
-  gap:4px;
-  justify-content:center;
+  width:360px;
+  height:360px;
   margin:20px auto;
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  background:#006400;
 }
 
 .cell{
-  width:40px;
-  height:40px;
-  background:#1f7a2e;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  border:1px solid #003d00;
+  position:relative;
   cursor:pointer;
 }
 
@@ -66,43 +30,107 @@ select, button{
   box-shadow:0 0 10px 3px rgba(255,255,0,0.7) inset;
 }
 
+/* ===== 石 ===== */
 .disk{
-  width:30px;
-  height:30px;
+  width:80%;
+  height:80%;
   border-radius:50%;
+  position:absolute;
+  top:10%;
+  left:10%;
+  transform-style:preserve-3d;
+  transition:transform 0.3s;
+}
+
+.disk.flip{
+  transform:rotateY(180deg);
 }
 
 .black{ background:black; }
 .white{ background:white; }
 
-.controls{ margin-top:20px; }
+/* ===== スコア ===== */
+#scoreBoard{
+  margin-top:10px;
+  font-size:18px;
+}
 
-#winOverlay{
+/* ===== 実績 ===== */
+#achievements{
+  margin-top:10px;
+  font-size:14px;
+  text-align:left;
+  display:inline-block;
+}
+
+.achievement{
+  opacity:0.3;
+}
+
+.achievement.unlocked{
+  opacity:1;
+  color:gold;
+}
+
+/* ===== 勝利演出 ===== */
+#victoryOverlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.7);
+  background:rgba(0,0,0,0.85);
   display:flex;
   justify-content:center;
   align-items:center;
   flex-direction:column;
-  opacity:0;
-  pointer-events:none;
-  transition:0.4s;
+  z-index:999;
+  animation:fadeIn 0.5s;
 }
 
-#winOverlay.show{
-  opacity:1;
-  pointer-events:auto;
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
 }
 
-.winText{
-  font-size:28px;
-  margin-bottom:15px;
-  animation:pop 0.6s ease forwards;
+.victoryText{
+  font-size:48px;
+  font-weight:bold;
+  animation:glow 1s infinite alternate;
 }
 
-@keyframes pop{
-  0%{transform:scale(0.5);opacity:0;}
-  70%{transform:scale(1.2);}
-  100%{transform:scale(1);opacity:1;}
+@keyframes glow{
+  from{text-shadow:0 0 10px white;}
+  to{text-shadow:0 0 30px gold;}
+}
+
+.flash{
+  animation:flashAnim 0.4s;
+}
+
+@keyframes flashAnim{
+  0%{background:white;}
+  100%{background:#1f7a3a;}
+}
+
+.confetti{
+  position:fixed;
+  width:8px;
+  height:8px;
+  top:-10px;
+  animation:fall linear forwards;
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(100vh) rotate(720deg);
+    opacity:0;
+  }
+}
+
+/* ===== 旗 ===== */
+.flag {
+  width:128px;
+  max-width:20vw;
+  border-radius:50%;
+  border:1.5px solid var(--card-border-color);
+  margin:20px auto;
+  display:block;
 }
