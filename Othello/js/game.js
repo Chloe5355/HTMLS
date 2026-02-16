@@ -1,225 +1,205 @@
-const boardEl=document.getElementById("board");
-const info=document.getElementById("info");
-const logEl=document.getElementById("log");
-const aiToggle=document.getElementById("aiToggle");
-const colorSelect=document.getElementById("colorSelect");
-const aiSelect=document.getElementById("aiLevel");
+const titleScreen = document.getElementById("titleScreen");
+const gameScreen = document.getElementById("gameScreen");
+const startBtn = document.getElementById("startBtn");
+const backBtn = document.getElementById("backBtn");
+const boardDiv = document.getElementById("board");
+const turnLabel = document.getElementById("turnLabel");
 
-let board=[],current="black",human="black",ai="white";
-let gameOver=false,aiEnabled=true;
+const aiToggle = document.getElementById("aiToggle");
+const aiLevel = document.getElementById("aiLevel");
 
-function init(){
-  aiEnabled = aiToggle.value==="on";
-  human = colorSelect.value;
-  ai = human==="black"?"white":"black";
+let board, current, human, ai, aiEnabled;
+let gameOver=false;
+
+const SIZE=8;
+const DIRS=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+startBtn.onclick=()=>{
+  titleScreen.classList.remove("active");
+  gameScreen.classList.add("active");
+  initGame();
+};
+
+backBtn.onclick=()=>{
+  gameScreen.classList.remove("active");
+  titleScreen.classList.add("active");
+};
+
+function initGame(){
+  aiEnabled=aiToggle.value==="on";
+  human=Math.random()<0.5?"black":"white";
+  ai=human==="black"?"white":"black";
   current="black";
-
-  board=Array(8).fill().map(()=>Array(8).fill(null));
-  board[3][3]="white"; board[3][4]="black";
-  board[4][3]="black"; board[4][4]="white";
-
   gameOver=false;
+
+  board=Array(SIZE).fill().map(()=>Array(SIZE).fill(null));
+  board[3][3]="white";
+  board[3][4]="black";
+  board[4][3]="black";
+  board[4][4]="white";
+
   draw();
+  turnLabel.textContent="あなたは "+(human==="black"?"黒":"白")+" です";
 
   if(aiEnabled && current===ai)
     setTimeout(aiMove,500);
 }
 
 function draw(){
-  boardEl.innerHTML="";
-  for(let r=0;r<8;r++){
-    for(let c=0;c<8;c++){
+  boardDiv.innerHTML="";
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
       const cell=document.createElement("div");
       cell.className="cell";
-      cell.onclick=()=>humanMove(r,c);
+
+      if(canPlace(r,c,current)&&!gameOver)
+        cell.classList.add("valid");
+
+      cell.onclick=()=>handleClick(r,c);
 
       if(board[r][c]){
-        const disc=document.createElement("div");
-        disc.className="disc "+board[r][c];
-        cell.appendChild(disc);
+        const disk=document.createElement("div");
+        disk.className="disk "+board[r][c];
+        cell.appendChild(disk);
       }
 
-      boardEl.appendChild(cell);
+      boardDiv.appendChild(cell);
     }
   }
+  updateScore();
 }
 
-function humanMove(r,c){
+function updateScore(){
+  let black=0,white=0;
+  board.flat().forEach(v=>{
+    if(v==="black")black++;
+    if(v==="white")white++;
+  });
+
+  document.getElementById("scoreBoard").textContent=
+  "⚫黒:"+black+"　⚪白:"+white+
+  "　｜　手番:"+(current==="black"?"黒":"白");
+}
+
+function handleClick(r,c){
   if(gameOver) return;
+  if(aiEnabled && current!==human) return;
+  if(placeDisk(r,c,current)) nextTurn();
+}
 
-  if(aiEnabled){
-    if(current!==human) return;
-    if(move(r,c)) setTimeout(aiMove,300);
-  }else{
-    move(r,c);
+function placeDisk(r,c,color){
+  if(board[r][c]) return false;
+  let flipped=false;
+
+  for(const[dr,dc]of DIRS){
+    let rr=r+dr,cc=c+dc;
+    let temp=[];
+    while(inBoard(rr,cc)&&board[rr][cc]&&board[rr][cc]!==color){
+      temp.push([rr,cc]);
+      rr+=dr;cc+=dc;
+    }
+    if(temp.length && inBoard(rr,cc)&&board[rr][cc]===color){
+      temp.forEach(([fr,fc])=>board[fr][fc]=color);
+      flipped=true;
+    }
   }
+
+  if(flipped){
+    board[r][c]=color;
+    draw();
+    return true;
+  }
+  return false;
 }
 
-function aiMove(){
-  if(!aiEnabled || current!==ai || gameOver) return;
+function inBoard(r,c){return r>=0&&r<SIZE&&c>=0&&c<SIZE;}
 
-  const moves=getMoves(ai);
-  if(!moves.length){passTurn();return;}
-
-  let choice;
-  const level=aiSelect.value;
-
-  if(level==="easy")
-    choice=moves[Math.floor(Math.random()*moves.length)];
-  else
-    choice=moves.sort((a,b)=>b.flips-a.flips)[0];
-
-  move(choice.r,choice.c);
-}
-
-function move(r,c){
-  const flips=getFlips(r,c,current);
-  if(!flips.length) return false;
-
-  board[r][c]=current;
-  flips.forEach(f=>board[f[0]][f[1]]=current);
-
+function nextTurn(){
   current=current==="black"?"white":"black";
 
-  if(!getMoves(current).length){
+  if(!hasValidMove(current)){
     current=current==="black"?"white":"black";
-    if(!getMoves(current).length){
-      endGame();
-      return true;
+    if(!hasValidMove(current)){
+      endGame();return;
     }
   }
 
   draw();
-  return true;
+
+  if(aiEnabled && current===ai)
+    setTimeout(aiMove,400);
 }
 
-function getFlips(r,c,player){
-  if(board[r][c]) return [];
-  const opp=player==="black"?"white":"black";
-  const dirs=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
-  let flips=[];
-  for(const[dR,dC] of dirs){
-    let temp=[],nr=r+dR,nc=c+dC;
-    while(nr>=0&&nr<8&&nc>=0&&nc<8&&board[nr][nc]===opp){
-      temp.push([nr,nc]);
-      nr+=dR; nc+=dC;
+function hasValidMove(color){
+  for(let r=0;r<SIZE;r++)
+    for(let c=0;c<SIZE;c++)
+      if(canPlace(r,c,color)) return true;
+  return false;
+}
+
+function canPlace(r,c,color){
+  if(board[r][c]) return false;
+  for(const[dr,dc]of DIRS){
+    let rr=r+dr,cc=c+dc,found=false;
+    while(inBoard(rr,cc)&&board[rr][cc]&&board[rr][cc]!==color){
+      found=true;rr+=dr;cc+=dc;
     }
-    if(nr>=0&&nr<8&&nc>=0&&nc<8&&board[nr][nc]===player)
-      flips=flips.concat(temp);
+    if(found&&inBoard(rr,cc)&&board[rr][cc]===color) return true;
   }
-  return flips;
+  return false;
 }
 
-function getMoves(player){
+function aiMove(){
   let moves=[];
-  for(let r=0;r<8;r++)
-    for(let c=0;c<8;c++){
-      const f=getFlips(r,c,player);
-      if(f.length) moves.push({r,c,flips:f.length});
+  for(let r=0;r<SIZE;r++)
+    for(let c=0;c<SIZE;c++)
+      if(canPlace(r,c,ai))
+        moves.push({r,c,score:evaluateMove(r,c,ai)});
+
+  if(!moves.length){nextTurn();return;}
+
+  let choice;
+  if(aiLevel.value==="easy")
+    choice=moves[Math.floor(Math.random()*moves.length)];
+  else{
+    moves.sort((a,b)=>b.score-a.score);
+    choice=moves[0];
+  }
+
+  placeDisk(choice.r,choice.c,ai);
+  nextTurn();
+}
+
+function evaluateMove(r,c,color){
+  let score=0;
+  for(const[dr,dc]of DIRS){
+    let rr=r+dr,cc=c+dc;
+    while(inBoard(rr,cc)&&board[rr][cc]&&board[rr][cc]!==color){
+      score++;rr+=dr;cc+=dc;
     }
-  return moves;
+  }
+  if((r===0||r===7)&&(c===0||c===7)) score+=50;
+  return score;
 }
 
 function endGame(){
   gameOver=true;
-
   let black=0,white=0;
-  board.flat().forEach(c=>{
-    if(c==="black")black++;
-    if(c==="white")white++;
+  board.flat().forEach(v=>{
+    if(v==="black")black++;
+    if(v==="white")white++;
   });
 
-  let resultText,statResult;
-
-  if(aiEnabled){
-    if((human==="black"&&black>white)||(human==="white"&&white>black)){
-      resultText="あなたの勝ち"; statResult="win";
-    }else if(black===white){
-      resultText="引き分け"; statResult="draw";
-    }else{
-      resultText="あなたの負け"; statResult="lose";
-    }
-  }else{
-    if(black>white){resultText="黒の勝ち"; statResult="black";}
-    else if(white>black){resultText="白の勝ち"; statResult="white";}
-    else{resultText="引き分け"; statResult="draw";}
-  }
-
-  info.innerText=`${resultText} (${black}-${white})`;
-
-  saveStats(statResult);
-  saveLog(resultText,black,white);
-  updateStats();
-  loadLogs();
+  if(black>white) showWin("黒");
+  else if(white>black) showWin("白");
+  else showWin("引き分け");
 }
 
-function saveStats(result){
-  const stats=JSON.parse(localStorage.getItem("othelloStats"))||{
-    cpu:{win:0,lose:0,draw:0},
-    pvp:{black:0,white:0,draw:0}
-  };
-
-  if(aiEnabled) stats.cpu[result]++;
-  else{
-    if(result==="black") stats.pvp.black++;
-    else if(result==="white") stats.pvp.white++;
-    else stats.pvp.draw++;
-  }
-
-  localStorage.setItem("othelloStats",JSON.stringify(stats));
+function showWin(text){
+  document.getElementById("winMessage").textContent=text+" 勝利！";
+  document.getElementById("winOverlay").classList.add("show");
 }
 
-function updateStats(){
-  const stats=JSON.parse(localStorage.getItem("othelloStats"))||{
-    cpu:{win:0,lose:0,draw:0},
-    pvp:{black:0,white:0,draw:0}
-  };
-
-  const cpuTotal=stats.cpu.win+stats.cpu.lose+stats.cpu.draw;
-  const cpuRate=cpuTotal?((stats.cpu.win/cpuTotal)*100).toFixed(1):0;
-
-  document.getElementById("stats").innerHTML=
-  `🤖 CPU 勝:${stats.cpu.win} 負:${stats.cpu.lose} 引:${stats.cpu.draw} 勝率:${cpuRate}%<br>
-   👥 人間 黒:${stats.pvp.black} 白:${stats.pvp.white} 引:${stats.pvp.draw}`;
+function closeWin(){
+  document.getElementById("winOverlay").classList.remove("show");
 }
-
-function saveLog(result,b,w){
-  const logs=JSON.parse(localStorage.getItem("othelloLogs"))||[];
-
-  logs.unshift({
-    date:new Date().toLocaleString(),
-    mode:aiEnabled?"VS CPU":"人間対戦",
-    level:aiEnabled?aiSelect.value:"-",
-    result,black:b,white:w
-  });
-
-  localStorage.setItem("othelloLogs",JSON.stringify(logs));
-}
-
-function loadLogs(){
-  const logs=JSON.parse(localStorage.getItem("othelloLogs"))||[];
-  logEl.innerHTML=logs.map(l=>
-    `${l.date} | ${l.mode}${l.mode==="VS CPU"?"("+l.level+")":""} | ${l.result} (${l.black}-${l.white})`
-  ).join("<br>");
-}
-
-function clearLogs(){
-  localStorage.removeItem("othelloLogs");
-  loadLogs();
-}
-
-function passTurn(){
-  current=current==="black"?"white":"black";
-}
-
-function resetGame(){
-  init();
-}
-
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("service-worker.js");
-}
-
-init();
-updateStats();
-loadLogs();
