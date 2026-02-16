@@ -2,58 +2,41 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>オセロ Ultimate</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>オセロ</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <!-- ===== タイトル画面 ===== -->
-<div id="titleScreen" class="screen active">
-
+<div id="titleScreen">
   <img id="flag" class="flag"
-  src="https://chloe5355.github.io/HTMLS/img/Columbina.png"
-  alt="旗">
+    src="https://chloe5355.github.io/HTMLS/img/Columbina.png"
+    alt="旗">
 
-  <h1>♟ オセロ Ultimate</h1>
+  <h1>オセロ</h1>
 
-  <div class="menu">
-    <label>AI:
-      <select id="aiToggle">
-        <option value="on">オン</option>
-        <option value="off">オフ（2人対戦）</option>
-      </select>
-    </label>
+  <label>
+    <input type="checkbox" id="aiToggle" checked>
+    AIオン
+  </label>
 
-    <label>難易度:
-      <select id="aiLevel">
-        <option value="easy">やさしい</option>
-        <option value="normal">ふつう</option>
-        <option value="hard">つよい</option>
-      </select>
-    </label>
-  </div>
+  <select id="difficulty">
+    <option value="easy">Easy</option>
+    <option value="medium" selected>Medium</option>
+    <option value="hard">Hard</option>
+  </select>
 
-  <button id="startBtn" class="bigBtn">▶ ゲーム開始</button>
-  <button onclick="showAchievements()">🏅 実績</button>
+  <button id="startBtn">ゲーム開始</button>
+
+  <div id="stats"></div>
 </div>
 
 <!-- ===== ゲーム画面 ===== -->
-<div id="gameScreen" class="screen">
-  <h2 id="turnLabel"></h2>
+<div id="gameScreen" style="display:none;">
   <div id="scoreBoard"></div>
   <div id="board"></div>
-
-  <div class="controls">
-    <button onclick="initGame()">リスタート</button>
-    <button id="backBtn">タイトルへ戻る</button>
-  </div>
-</div>
-
-<!-- 勝利演出 -->
-<div id="winOverlay">
-  <div class="winText" id="winMessage"></div>
-  <button onclick="closeWin()">OK</button>
+  <button onclick="goTitle()">タイトルへ戻る</button>
 </div>
 
 <script src="js/game.js"></script>
