@@ -24,10 +24,11 @@ body{
   border:1px solid #003d00;
   position:relative;
   cursor:pointer;
+  transition: box-shadow 0.3s;
 }
 
 .cell.valid{
-  box-shadow:0 0 10px 3px rgba(255,255,0,0.7) inset;
+  box-shadow:0 0 15px 5px rgba(255,255,0,0.8) inset;
 }
 
 /* ===== 石 ===== */
@@ -39,7 +40,7 @@ body{
   top:10%;
   left:10%;
   transform-style:preserve-3d;
-  transition:transform 0.45s;
+  transition:transform 0.5s;
 }
 
 .disk.flip{
@@ -61,6 +62,15 @@ body{
   font-size:14px;
   text-align:left;
   display:inline-block;
+}
+
+.achievement{
+  opacity:0.3;
+}
+
+.achievement.unlocked{
+  opacity:1;
+  color:gold;
 }
 
 /* ===== 勝利演出 ===== */
