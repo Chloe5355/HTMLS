@@ -4,16 +4,13 @@ let board,current,aiEnabled,ai,difficulty,gameOver=false;
 const boardDiv=document.getElementById("board");
 const statsDiv=document.getElementById("stats");
 const scoreBoard=document.getElementById("scoreBoard");
-const difficultySelect=document.getElementById("difficulty");
-const statsMode=document.getElementById("statsMode");
 
 document.getElementById("startBtn").onclick=startGame;
-statsMode.addEventListener("change",loadStats);
 
 /* ===================== */
 function startGame(){
   aiEnabled=document.getElementById("aiToggle").checked;
-  difficulty=difficultySelect.value;
+  difficulty=document.getElementById("difficulty").value;
 
   document.getElementById("titleScreen").style.display="none";
   document.getElementById("gameScreen").style.display="block";
@@ -28,7 +25,6 @@ function startGame(){
   draw();
 }
 
-/* ===================== */
 function goTitle(){
   document.getElementById("gameScreen").style.display="none";
   document.getElementById("titleScreen").style.display="block";
@@ -52,8 +48,10 @@ function draw(){
       const cell=document.createElement("div");
       cell.className="cell";
 
-      if(!aiEnabled && canPlace(r,c,current) && !gameOver)
+      // 置けるマスを光らせる
+      if(!gameOver && canPlace(r,c,current)){
         cell.classList.add("valid");
+      }
 
       cell.onclick=()=>handleClick(r,c);
 
@@ -90,9 +88,8 @@ function nextTurn(){
   draw();
 
   if(aiEnabled && current===ai){
-    const delay = difficulty==="easy" ? 900 :
-                  difficulty==="medium" ? 600 : 400;
-    setTimeout(aiMove, delay);
+    // AI動作を遅延
+    setTimeout(aiMove, 800);
   }
 }
 
@@ -136,7 +133,8 @@ function flip(r,c,color){
         const disk=boardDiv.children[index].firstChild;
         if(disk){
           disk.classList.add("flip");
-          setTimeout(()=>disk.classList.remove("flip"),300);
+          // フリップアニメのテンポを0.5秒に
+          setTimeout(()=>disk.classList.remove("flip"), 500);
         }
       });
     }
@@ -167,51 +165,16 @@ function updateScore(){
 }
 
 /* ===================== */
-function getValidMoves(player){
-  const list=[];
-  for(let r=0;r<SIZE;r++)
-    for(let c=0;c<SIZE;c++)
-      if(canPlace(r,c,player))
-        list.push({r,c});
-  return list;
-}
-
-function countFlips(r,c,color){
-  let total=0;
-  const enemy=color==="black"?"white":"black";
-  const dirs=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-
-  dirs.forEach(([dr,dc])=>{
-    let nr=r+dr,nc=c+dc,count=0;
-    while(inBoard(nr,nc)&&board[nr][nc]===enemy){
-      count++; nr+=dr; nc+=dc;
-    }
-    if(inBoard(nr,nc)&&board[nr][nc]===color) total+=count;
-  });
-  return total;
-}
-
-function randomMove(moves){ return moves[Math.floor(Math.random()*moves.length)]; }
-function bestFlipMove(moves){
-  let max=-1,best=moves[0];
-  for(const m of moves){
-    const count=countFlips(m.r,m.c,current);
-    if(count>max){ max=count; best=m; }
-  }
-  return best;
-}
-
-/* ===================== */
 function aiMove(){
-  const moves=getValidMoves(current);
-  if(!moves.length) return;
-
-  let move;
-  if(difficulty==="easy") move=randomMove(moves);
-  else if(difficulty==="medium") move=bestFlipMove(moves);
-  else move=bestFlipMove(moves); // 強はここでは簡略版（本格ミニマックスは別実装可）
-
-  place(move.r,move.c,current);
+  const moves=[];
+  board.forEach((row,r)=>{
+    row.forEach((_,c)=>{
+      if(canPlace(r,c,ai)) moves.push([r,c]);
+    });
+  });
+  if(moves.length===0) return;
+  const [r,c]=moves[Math.floor(Math.random()*moves.length)];
+  place(r,c,ai);
   nextTurn();
 }
 
@@ -230,8 +193,9 @@ function endGame(){
   if(white>black) result="white";
 
   saveResult(result);
+  checkAchievements(result,black,white);
 
-  setTimeout(()=>showVictory(result,black,white),1000);
+  showVictory(result,black,white);
 }
 
 /* ===================== */
@@ -260,21 +224,20 @@ function showVictory(winner,black,white){
 }
 
 function launchConfetti(winner){
-  const colors = winner==="black"? ["white","gold","silver"] : ["black","gold","silver"];
-  let i=0;
-  const interval=setInterval(()=>{
-    for(let j=0;j<8;j++){
-      const conf=document.createElement("div");
-      conf.className="confetti";
-      conf.style.left=Math.random()*100+"vw";
-      conf.style.background=colors[Math.floor(Math.random()*colors.length)];
-      conf.style.animationDuration=(Math.random()*2+2)+"s";
-      document.body.appendChild(conf);
-      setTimeout(()=>conf.remove(),4000);
-    }
-    i+=8;
-    if(i>=120) clearInterval(interval);
-  },120);
+  const colors = winner==="black"
+    ? ["white","gold","silver"]
+    : ["black","gold","silver"];
+
+  for(let i=0;i<120;i++){
+    const conf=document.createElement("div");
+    conf.className="confetti";
+    conf.style.left=Math.random()*100+"vw";
+    conf.style.background=colors[Math.floor(Math.random()*colors.length)];
+    conf.style.animationDuration=(Math.random()*2+2)+"s";
+    document.body.appendChild(conf);
+
+    setTimeout(()=>conf.remove(),4000);
+  }
 }
 
 function closeVictory(){
@@ -284,35 +247,46 @@ function closeVictory(){
 }
 
 /* ===================== */
-function saveResult(result){
-  let s=JSON.parse(localStorage.getItem("othelloStats")||"{}");
+function saveResult(winner){
+  const stats=JSON.parse(localStorage.getItem("othelloStats")||"{}");
+  stats.total=(stats.total||0)+1;
+  stats[winner]=(stats[winner]||0)+1;
+  localStorage.setItem("othelloStats",JSON.stringify(stats));
+}
 
-  if(!s.total){
-    s={ total:0, pvp:{black:0,white:0,draw:0}, ai:{black:0,white:0,draw:0} };
-  }
+/* ===================== */
+function checkAchievements(winner,black,white){
+  const ach=JSON.parse(localStorage.getItem("achievements")||"{}");
+  const stats=JSON.parse(localStorage.getItem("othelloStats")||"{}");
 
-  s.total++;
-  const mode=aiEnabled?"ai":"pvp";
+  if(stats.total>=1) ach.first=true;
+  if((stats.black||0)+(stats.white||0)>=5) ach.fiveWins=true;
+  if(aiEnabled && winner!==ai && winner!=="draw") ach.cpuWin=true;
+  if(stats.total>=10) ach.tenGames=true;
+  if(black===64||white===64) ach.perfect=true;
 
-  if(result==="black") s[mode].black++;
-  else if(result==="white") s[mode].white++;
-  else s[mode].draw++;
-
-  localStorage.setItem("othelloStats",JSON.stringify(s));
+  localStorage.setItem("achievements",JSON.stringify(ach));
 }
 
 /* ===================== */
 function loadStats(){
   const s=JSON.parse(localStorage.getItem("othelloStats")||"{}");
-  const mode=statsMode.value;
-  if(!s[mode]) return;
-
-  const wins=s[mode].black+s[mode].white;
+  const ach=JSON.parse(localStorage.getItem("achievements")||"{}");
 
   statsDiv.innerHTML=
-    `<hr>
-     <b>📜 実績</b><br>
-     勝利回数: ${wins}`;
+   `総対戦:${s.total||0}<br>
+    黒勝:${s.black||0}<br>
+    白勝:${s.white||0}<br>
+    引分:${s.draw||0}
+    <div id="achievements">
+    <hr>
+    <b>🏆 実績</b><br>
+    <div class="achievement ${ach.first?'unlocked':''}">🎮 初プレイ</div>
+    <div class="achievement ${ach.fiveWins?'unlocked':''}">🏅 5勝達成</div>
+    <div class="achievement ${ach.cpuWin?'unlocked':''}">🤖 CPU撃破</div>
+    <div class="achievement ${ach.tenGames?'unlocked':''}">👑 10連戦</div>
+    <div class="achievement ${ach.perfect?'unlocked':''}">💯 完封勝利</div>
+    </div>`;
 }
 
 loadStats();
