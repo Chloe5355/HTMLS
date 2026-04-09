@@ -2,197 +2,106 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>借用書</title>
-
+<title>借用書（損害賠償金）</title>
 <style>
-@page {
+  @page {
     size: A4;
-    margin: 6mm; /* 限界まで詰める */
-}
+    margin: 15mm;
+  }
 
-body {
-    font-family: "MS 明朝", serif;
-    font-size: 15px; /* ← ここが限界ライン */
+  body {
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
     line-height: 1.6;
-    color: #000;
+    font-size: 14px;
     margin: 0;
-}
+  }
 
-.container {
-    max-width: 198mm;
-    margin: auto;
-}
+  .container {
+    width: 100%;
+  }
 
-.title {
+  h1 {
     text-align: center;
-    font-size: 25px;
-    font-weight: bold;
-    margin-bottom: 6px;
-}
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
 
-.intro {
-    margin-bottom: 6px;
-}
-
-.section {
-    margin-bottom: 6px;
-}
-
-.section-title {
-    font-weight: bold;
-}
-
-.content {
-    margin-left: 6px;
-}
-
-.note {
-    margin-left: 6px;
-    font-size: 10px;
-}
-
-.line {
-    display: inline-block;
-    border-bottom: 1px solid #000;
-    min-width: 75px;
-    height: 1em;
-}
-
-.right {
-    text-align: right;
-    margin-top: 10px;
-}
-
-.sign-area {
-    margin-top: 15px;
-}
-
-.sign-block {
-    margin-top: 10px;
-}
-
-.sign-line {
-    display: inline-block;
-    border-bottom: 1px solid #000;
-    width: 280px;
-}
-
-.divider {
-    border-top: 1px solid #000;
+  p {
+    text-indent: 1em;
     margin: 10px 0;
-}
+  }
 
-/* 改ページ完全防止 */
-* {
-    page-break-inside: avoid;
-}
+  .section {
+    margin-top: 15px;
+  }
+
+  .item {
+    margin: 6px 0;
+  }
+
+  .line {
+    border-bottom: 1px solid #000;
+    display: inline-block;
+    min-width: 200px;
+  }
+
+  .footer {
+    margin-top: 25px;
+  }
+
+  .sign {
+    margin-top: 30px;
+  }
+
+  .sign div {
+    margin-top: 10px;
+  }
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
-<br>
+<h1>借用書</h1>
 
-<div class="title">借用書</div>
-
-<br>
-
-<div class="intro">
+<p>
 私は、佐瀬 京の所有する車両を運転中、危険な運転行為（ドリフト行為）により事故を起こし、当該車両に損害を与えたことを認めます。
-<br>
+</p>
+
+<p>
 つきましては、当該事故による修理費等の損害賠償金として、下記金額を佐瀬 京に対して支払う義務があることを認め、これを借用金として受領したものとみなし、以下の条件で返済することを約束します。
-</div>
-
-<br>
+</p>
 
 <div class="section">
-<div class="section-title">1. 借入金額</div>
-<div class="content">金 2,200,000円（弐百弐拾万円）</div>
+  <div class="item">■借用金額　金 <span class="line"></span> 円</div>
+  <div class="item">■支払期日　令和 <span class="line"></span> 年 <span class="line"></span> 月 <span class="line"></span> 日まで</div>
+  <div class="item">■返済方法　毎月 <span class="line"></span> 円ずつ分割払い（振込先：<span class="line"></span>）</div>
+  <div class="item">■遅延損害金　支払期日を過ぎた場合、年 <span class="line"></span> ％の遅延損害金を支払います。</div>
 </div>
-
-<br>
 
 <div class="section">
-<div class="section-title">2. 頭金（既払金）</div>
-<div class="content">金 1,000,000円（壱百万円）</div>
-<div class="note">※上記金額は本借入に充当済みとする</div>
+  <div class="item">■その他</div>
+  <div class="item">本件に関し紛争が生じた場合は、佐瀬 京の住所地を管轄する裁判所を専属的合意管轄とします。</div>
 </div>
 
-<br>
+<div class="footer">
+  以上、本書2通を作成し、佐瀬 京、宮山 蓮 各1通を保有します。
+</div>
 
 <div class="section">
-<div class="section-title">3. 実際の借入残額</div>
-<div class="content">金 1,200,000円（壱百弐拾万円）</div>
+  令和 <span class="line"></span> 年 <span class="line"></span> 月 <span class="line"></span> 日
 </div>
 
-<br>
+<div class="sign">
+  <div>【 佐瀬 京 】</div>
+  <div>住所：<span class="line" style="min-width:300px;"></span></div>
+  <div>氏名：<span class="line" style="min-width:200px;"></span> 印</div>
 
-<div class="section">
-<div class="section-title">4. 借入日</div>
-<div class="content">
-令和 <span class="line"></span> 年
-<span class="line"></span> 月
-<span class="line"></span> 日
-</div>
-</div>
-
-<br>
-
-<div class="section">
-<div class="section-title">5. 返済方法</div>
-<div class="content">
-毎月 <span class="line"></span> 円 ／ 毎月 <span class="line"></span> 日<br>
-令和 <span class="line"></span> 年 <span class="line"></span> 月開始<br>
-最終：令和 <span class="line"></span> 年 <span class="line"></span> 月 <span class="line"></span> 日<br>
-（振込にて支払）
-</div>
-</div>
-
-<br>
-
-<div class="section">
-<div class="section-title">6. 利息</div>
-<div class="content">無利息</div>
-</div>
-
-<br>
-
-<div class="section">
-<div class="section-title">7. 遅延損害金</div>
-<div class="content">なし</div>
-</div>
-
-<br>
-
-<div class="divider"></div>
-
-<br>
-
-<div class="right">
-令和 <span class="line"></span> 年
-<span class="line"></span> 月
-<span class="line"></span> 日
-</div>
-
-<div class="sign-area">
-
-<div class="sign-block">
-借主　住所：<span class="sign-line"></span><br>
-氏名：<span class="sign-line"></span> 印
-</div>
-
-<br>
-
-<div class="sign-block">
-貸主　住所：<span class="sign-line"></span><br>
-氏名：<span class="sign-line"></span> 印
+  <div style="margin-top:20px;">【 宮山 蓮 】</div>
+  <div>住所：<span class="line" style="min-width:300px;"></span></div>
+  <div>氏名：<span class="line" style="min-width:200px;"></span> 印</div>
 </div>
 
 </div>
-
-</div>
-
 </body>
 </html>
