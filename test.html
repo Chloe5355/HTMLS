@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>借用書</title>
+
+<style>
+@page {
+    size: A4;
+    margin: 6mm; /* 限界まで詰める */
+}
+
+body {
+    font-family: "MS 明朝", serif;
+    font-size: 17px; /* ← ここが限界ライン */
+    line-height: 1.6;
+    color: #000;
+    margin: 0;
+}
+
+.container {
+    max-width: 198mm;
+    margin: auto;
+}
+
+.title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.intro {
+    margin-bottom: 6px;
+}
+
+.section {
+    margin-bottom: 6px;
+}
+
+.section-title {
+    font-weight: bold;
+}
+
+.content {
+    margin-left: 6px;
+}
+
+.note {
+    margin-left: 6px;
+    font-size: 12px;
+}
+
+.line {
+    display: inline-block;
+    border-bottom: 1px solid #000;
+    min-width: 75px;
+    height: 1em;
+}
+
+.right {
+    text-align: right;
+    margin-top: 10px;
+}
+
+.sign-area {
+    margin-top: 15px;
+}
+
+.sign-block {
+    margin-top: 10px;
+}
+
+.sign-line {
+    display: inline-block;
+    border-bottom: 1px solid #000;
+    width: 280px;
+}
+
+.divider {
+    border-top: 1px solid #000;
+    margin: 10px 0;
+}
+
+/* 改ページ完全防止 */
+* {
+    page-break-inside: avoid;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="title">借用書</div>
+
+<div class="intro">
+私は、下記の通り金銭を借り入れたことを認めます。
+</div>
+
+<div class="section">
+<div class="section-title">1. 借入金額</div>
+<div class="content">金 2,200,000円（弐百弐拾万円）</div>
+</div>
+
+<div class="section">
+<div class="section-title">2. 頭金（既払金）</div>
+<div class="content">金 1,000,000円（壱百万円）</div>
+<div class="note">※上記金額は本借入に充当済みとする</div>
+</div>
+
+<div class="section">
+<div class="section-title">3. 実際の借入残額</div>
+<div class="content">金 1,200,000円（壱百弐拾万円）</div>
+</div>
+
+<div class="section">
+<div class="section-title">4. 借入日</div>
+<div class="content">
+令和 <span class="line"></span> 年
+<span class="line"></span> 月
+<span class="line"></span> 日
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">5. 返済方法</div>
+<div class="content">
+毎月 <span class="line"></span> 円 ／ 毎月 <span class="line"></span> 日<br>
+令和 <span class="line"></span> 年 <span class="line"></span> 月開始<br>
+最終：令和 <span class="line"></span> 年 <span class="line"></span> 月 <span class="line"></span> 日<br>
+（振込にて支払）
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">6. 利息</div>
+<div class="content">無利息</div>
+</div>
+
+<div class="section">
+<div class="section-title">7. 遅延損害金</div>
+<div class="content">なし</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="right">
+令和 <span class="line"></span> 年
+<span class="line"></span> 月
+<span class="line"></span> 日
+</div>
+
+<div class="sign-area">
+
+<div class="sign-block">
+借主　住所：<span class="sign-line"></span><br>
+氏名：<span class="sign-line"></span> 印
+</div>
+
+<div class="sign-block">
+貸主　住所：<span class="sign-line"></span><br>
+氏名：<span class="sign-line"></span> 印
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
